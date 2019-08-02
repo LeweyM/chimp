@@ -8,6 +8,14 @@ type Token struct {
 type TokenType string
 
 const (
+	EOF     = "EOF"
+	ILLEGAL = "ILLEGAL"
+
+	FUNCTION = "FUN"
+	LET      = "LET"
+	IDENT    = "IDENT"
+	INT      = "INT"
+
 	EQUALS = "="
 	PLUS   = "+"
 
