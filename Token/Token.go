@@ -16,8 +16,12 @@ const (
 	IDENT    = "IDENT"
 	INT      = "INT"
 
-	EQUALS = "="
+	ASSIGN = "="
 	PLUS   = "+"
+	MINUS  = "-"
+
+	GT = ">"
+	LT = "<"
 
 	LPAREN = "{"
 	RPAREN = "}"

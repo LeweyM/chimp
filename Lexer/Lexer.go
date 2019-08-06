@@ -30,9 +30,15 @@ func (l *Lexer) NextToken() Token.Token {
 
 	switch l.ch {
 	case '=':
-		tok = newToken(Token.EQUALS, "=")
+		tok = newToken(Token.ASSIGN, "=")
 	case '+':
 		tok = newToken(Token.PLUS, "+")
+	case '-':
+		tok = newToken(Token.MINUS, "-")
+	case '>':
+		tok = newToken(Token.GT, ">")
+	case '<':
+		tok = newToken(Token.LT, "<")
 	case '{':
 		tok = newToken(Token.LPAREN, "{")
 	case '}':
@@ -56,7 +62,7 @@ func (l *Lexer) NextToken() Token.Token {
 				return newToken(keyword, word)
 			}
 		} else if isDigit(l.ch) {
-			tok = newToken(Token.INT, getNumber(l))
+			return newToken(Token.INT, getNumber(l))
 		} else {
 			tok = newToken(Token.ILLEGAL, "ILLEGAL")
 		}
