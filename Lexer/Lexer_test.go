@@ -7,7 +7,7 @@ import (
 
 func TestNextToken(t *testing.T) {
 	var input = `
-		=;{}(),+
+		=;{}(),+!
 		let myVar =   99
 		let plus = fun(x, y) {
 			x + y
@@ -27,6 +27,7 @@ func TestNextToken(t *testing.T) {
 		{Token.RBRACE, ")"},
 		{Token.COMMA, ","},
 		{Token.PLUS, "+"},
+		{Token.BANG, "!"},
 		{Token.LET, "let"},
 		{Token.IDENT, "myVar"},
 		{Token.ASSIGN, "="},
@@ -108,13 +109,16 @@ func TestNumberAndWordLexing(t *testing.T) {
 
 func TestPeekingTokens(t *testing.T) {
 	var input = `
-		==
+		== >= <= !=
 `
 	var tests = []struct {
 		tokenType    Token.TokenType
 		tokenLiteral string
 	}{
 		{Token.EQ, "=="},
+		{Token.GTE, ">="},
+		{Token.LTE, "<="},
+		{Token.NEQ, "!="},
 	}
 
 	l := New(input)

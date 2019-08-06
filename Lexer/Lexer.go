@@ -30,7 +30,6 @@ func (l *Lexer) NextToken() Token.Token {
 
 	switch l.ch {
 	case '=':
-
 		if peekToken := l.peekToken(); peekToken == '=' {
 			tok = newToken(Token.EQ, "==")
 			l.readNextChar()
@@ -39,12 +38,29 @@ func (l *Lexer) NextToken() Token.Token {
 		}
 	case '+':
 		tok = newToken(Token.PLUS, "+")
+	case '!':
+		if peekToken := l.peekToken(); peekToken == '=' {
+			tok = newToken(Token.NEQ, "!=")
+			l.readNextChar()
+		} else {
+			tok = newToken(Token.BANG, "!")
+		}
 	case '-':
 		tok = newToken(Token.MINUS, "-")
 	case '>':
-		tok = newToken(Token.GT, ">")
+		if peekToken := l.peekToken(); peekToken == '=' {
+			tok = newToken(Token.GTE, ">=")
+			l.readNextChar()
+		} else {
+			tok = newToken(Token.GT, ">")
+		}
 	case '<':
-		tok = newToken(Token.LT, "<")
+		if peekToken := l.peekToken(); peekToken == '=' {
+			tok = newToken(Token.LTE, "<=")
+			l.readNextChar()
+		} else {
+			tok = newToken(Token.LT, "<")
+		}
 	case '{':
 		tok = newToken(Token.LPAREN, "{")
 	case '}':

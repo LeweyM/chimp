@@ -17,12 +17,16 @@ const (
 	INT      = "INT"
 
 	EQ     = "=="
+	NEQ    = "!="
+	BANG   = "!"
 	ASSIGN = "="
 	PLUS   = "+"
 	MINUS  = "-"
 
-	GT = ">"
-	LT = "<"
+	GT  = ">"
+	LT  = "<"
+	GTE = ">="
+	LTE = "<="
 
 	LPAREN = "{"
 	RPAREN = "}"
