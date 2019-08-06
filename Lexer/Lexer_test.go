@@ -8,13 +8,11 @@ import (
 func TestNextToken(t *testing.T) {
 	var input = `
 		=;{}(),+
-		let foo =    5
-		let myVar = 99
+		let myVar =   99
 		let plus = fun(x, y) {
 			x + y
 		}
-		6 - 5
-		10 > 2 < 3
+		6 - 5; 10 > 2 < 3
 `
 
 	var tests = []struct {
@@ -29,10 +27,6 @@ func TestNextToken(t *testing.T) {
 		{Token.RBRACE, ")"},
 		{Token.COMMA, ","},
 		{Token.PLUS, "+"},
-		{Token.LET, "let"},
-		{Token.IDENT, "foo"},
-		{Token.ASSIGN, "="},
-		{Token.INT, "5"},
 		{Token.LET, "let"},
 		{Token.IDENT, "myVar"},
 		{Token.ASSIGN, "="},
@@ -54,6 +48,7 @@ func TestNextToken(t *testing.T) {
 		{Token.INT, "6"},
 		{Token.MINUS, "-"},
 		{Token.INT, "5"},
+		{Token.SEMICOLON, ";"},
 		{Token.INT, "10"},
 		{Token.GT, ">"},
 		{Token.INT, "2"},
@@ -94,6 +89,32 @@ func TestNumberAndWordLexing(t *testing.T) {
 		{Token.SEMICOLON, ";"},
 		{Token.IDENT, "fifty"},
 		{Token.SEMICOLON, ";"},
+	}
+
+	l := New(input)
+
+	for i, tt := range tests {
+		token := l.NextToken()
+
+		if tt.tokenType != token.Type {
+			t.Fatalf("tests[%d] - tokenType wrong. expected=%q, got=%q", i, tt.tokenType, token.Type)
+		}
+
+		if tt.tokenLiteral != token.Literal {
+			t.Fatalf("tests[%d] - tokenLiteral wrong. expected=%q, got=%q", i, tt.tokenLiteral, token.Literal)
+		}
+	}
+}
+
+func TestPeekingTokens(t *testing.T) {
+	var input = `
+		==
+`
+	var tests = []struct {
+		tokenType    Token.TokenType
+		tokenLiteral string
+	}{
+		{Token.EQ, "=="},
 	}
 
 	l := New(input)

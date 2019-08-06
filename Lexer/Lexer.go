@@ -30,7 +30,13 @@ func (l *Lexer) NextToken() Token.Token {
 
 	switch l.ch {
 	case '=':
-		tok = newToken(Token.ASSIGN, "=")
+
+		if peekToken := l.peekToken(); peekToken == '=' {
+			tok = newToken(Token.EQ, "==")
+			l.readNextChar()
+		} else {
+			tok = newToken(Token.ASSIGN, "=")
+		}
 	case '+':
 		tok = newToken(Token.PLUS, "+")
 	case '-':
@@ -71,6 +77,10 @@ func (l *Lexer) NextToken() Token.Token {
 	l.readNextChar()
 
 	return tok
+}
+
+func (l *Lexer) peekToken() byte {
+	return l.input[l.readPos]
 }
 
 func getNumber(l *Lexer) string {
