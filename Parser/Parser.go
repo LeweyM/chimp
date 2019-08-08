@@ -1,35 +1,39 @@
 package Parser
 
 import (
-	"Chimp/Ast"
-	"Chimp/Lexer"
-	"Chimp/Token"
+	"github.com/LeweyM/chimp/Ast"
+	"github.com/LeweyM/chimp/Lexer"
+	"github.com/LeweyM/chimp/Token"
 )
 
 type Parser struct {
-	l Lexer.Lexer
+	l        Lexer.Lexer
+	curToken Token.Token
 }
 
-func (p *Parser)ParseProgramme() Ast.Programme {
-	token := p.NextToken()
-
-	switch token.Type {
+func (p *Parser) ParseProgramme() Ast.Programme {
+	switch p.curToken.Type {
 	case Token.LET:
-		ParseLetStatement(token)
+		ParseLetStatement(p.curToken)
 	}
 
 	return Ast.Programme{}
 }
 
-func ParseLetStatement(token Token.Token) {
-
+func ParseLetStatement(token Token.Token) Ast.LetStatement {
+	return Ast.LetStatement{
+		Token: token,
+		Name:  "hello",
+		Value: &Ast.IntegerExpression{Token: token, Value: int64(999)},
+	}
 }
 
 func New(l Lexer.Lexer) *Parser {
-	return &Parser{l}
+	p := Parser{l: l}
+	p.NextToken()
+	return &p
 }
 
-func (p *Parser)NextToken() Token.Token {
-	return p.l.NextToken()
+func (p *Parser) NextToken() {
+	p.curToken = p.l.NextToken()
 }
-

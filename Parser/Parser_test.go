@@ -1,9 +1,9 @@
 package Parser
 
 import (
-	"Chimp/Ast"
-	"Chimp/Lexer"
-	"Chimp/Token"
+	"github.com/LeweyM/chimp/Ast"
+	"github.com/LeweyM/chimp/Lexer"
+	"github.com/LeweyM/chimp/Token"
 	"testing"
 )
 
@@ -25,6 +25,10 @@ func TestParseLetStatement(t *testing.T) {
 		p := New(*l)
 
 		programme := p.ParseProgramme()
+
+		if len(programme.Statements) != 1 {
+			t.Fatalf("wrong number of statements in programme; wanted 1, got %d", len(programme.Statements))
+		}
 
 		statement := programme.Statements[0]
 
