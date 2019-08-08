@@ -1,7 +1,6 @@
 package Lexer
 
 import (
-	"Chimp/Token"
 	"testing"
 )
 

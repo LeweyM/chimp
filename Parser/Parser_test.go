@@ -12,12 +12,15 @@ func TestParseLetStatement(t *testing.T) {
 		input         string
 		expectedToken Token.Token
 		expectedValue Ast.Expression
-		expectedName  string
+		expectedName  Ast.Expression
 	}{
 		{
 			input:         "let five = 5",
 			expectedToken: Token.Token{Type: Token.LET, Literal: "let"},
-			expectedName:  "five",
+			expectedName: Ast.IdentityExpression{
+				Token: Token.Token{Type: Token.IDENT, Literal: "five"},
+				Value: "five",
+			},
 		}}
 
 	for _, tt := range tests {
@@ -25,6 +28,10 @@ func TestParseLetStatement(t *testing.T) {
 		p := New(*l)
 
 		programme := p.ParseProgramme()
+
+		if len(programme.Statements) != 1 {
+			t.Fatalf("wrong number of statements in programme; wanted 1, got %d", len(programme.Statements))
+		}
 
 		statement := programme.Statements[0]
 
@@ -41,7 +48,12 @@ func TestParseLetStatement(t *testing.T) {
 			t.Fatalf("Expected literal of %s, got %s", tt.expectedToken.Literal, letStatement.TokenLiteral())
 		}
 
-		if tt.expectedName != letStatement.Name {
+		identityExpression, ok := tt.expectedName.(Ast.IdentityExpression)
+		if !ok {
+			t.Fatal("Identifier not of type IdentityExpression")
+		}
+
+		if identityExpression.Value != letStatement.Name.Value {
 			t.Fatalf("Expected identifier name of %s, got %s", tt.expectedName, letStatement.Name)
 		}
 
