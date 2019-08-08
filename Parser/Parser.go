@@ -20,7 +20,7 @@ func (p *Parser) ParseProgramme() Ast.Programme {
 			programme.Statements = append(programme.Statements, statement)
 		}
 
-		p.NextToken()
+		p.AdvanceTokens()
 	}
 
 	return programme
@@ -35,15 +35,24 @@ func (p *Parser) parseStatement() Ast.Statement {
 	}
 }
 
+func (p *Parser) parseExpression() Ast.Expression {
+	switch p.curToken.Type {
+	case Token.INT:
+		return &Ast.IntegerExpression{Token: p.curToken, Value: int64(999)}
+	default:
+		return nil
+	}
+}
+
 func (p *Parser) ParseLetStatement() *Ast.LetStatement {
 	letToken := p.curToken
-	if p.NextToken(); p.curToken.Type != Token.IDENT {
+	if p.AdvanceTokens(); p.curToken.Type != Token.IDENT {
 		// err
 	}
 	return &Ast.LetStatement{
 		Token: letToken,
 		Name:  p.parseIdentExpression(),
-		Value: &Ast.IntegerExpression{Token: letToken, Value: int64(999)},
+		Value: p.parseExpression(),
 	}
 }
 
@@ -57,10 +66,10 @@ func (p *Parser) parseIdentExpression() Ast.IdentityExpression {
 
 func New(l Lexer.Lexer) *Parser {
 	p := Parser{l: l}
-	p.NextToken()
+	p.AdvanceTokens()
 	return &p
 }
 
-func (p *Parser) NextToken() {
+func (p *Parser) AdvanceTokens() {
 	p.curToken = p.l.NextToken()
 }
