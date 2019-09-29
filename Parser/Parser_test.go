@@ -11,8 +11,8 @@ func TestParseLetStatement(t *testing.T) {
 	var tests = []struct {
 		input         string
 		expectedToken Token.Token
-		expectedValue Ast.Expression
 		expectedName  Ast.Expression
+		expectedValue Ast.Expression
 	}{
 		{
 			input:         "let five = 5",
@@ -21,7 +21,23 @@ func TestParseLetStatement(t *testing.T) {
 				Token: Token.Token{Type: Token.IDENT, Literal: "five"},
 				Value: "five",
 			},
-		}}
+			expectedValue: Ast.IntegerExpression{
+				Token: Token.Token{Type: Token.INT, Literal: "5"},
+				Value: 5,
+			},
+		}, {
+			input:         "let foo = 67",
+			expectedToken: Token.Token{Type: Token.LET, Literal: "let"},
+			expectedName: Ast.IdentityExpression{
+				Token: Token.Token{Type: Token.IDENT, Literal: "foo"},
+				Value: "foo",
+			},
+			expectedValue: Ast.IntegerExpression{
+				Token: Token.Token{Type: Token.INT, Literal: "67"},
+				Value: 67,
+			},
+		},
+	}
 
 	for _, tt := range tests {
 		l := Lexer.New(tt.input)
@@ -45,7 +61,7 @@ func TestParseLetStatement(t *testing.T) {
 		}
 
 		if tt.expectedToken.Literal != letStatement.Token.Literal {
-			t.Fatalf("Expected literal of %s, got %s", tt.expectedToken.Literal, letStatement.TokenLiteral())
+			t.Fatalf("Expected let literal of %s, got %s", tt.expectedToken.Literal, letStatement.TokenLiteral())
 		}
 
 		identityExpression, ok := tt.expectedName.(Ast.IdentityExpression)
@@ -55,6 +71,20 @@ func TestParseLetStatement(t *testing.T) {
 
 		if identityExpression.Value != letStatement.Name.Value {
 			t.Fatalf("Expected identifier name of %s, got %s", tt.expectedName, letStatement.Name)
+		}
+
+		expectedIntegerExpression, ok := tt.expectedValue.(Ast.IntegerExpression)
+		if !ok {
+			t.Fatal("Expected value not of type IntegerExpression")
+		}
+
+		integerExpression, ok := letStatement.Value.(*Ast.IntegerExpression)
+		if !ok {
+			t.Fatal("Value not of type IntegerExpression")
+		}
+
+		if expectedIntegerExpression.Value != integerExpression.Value {
+			t.Fatalf("Expected value of %s, got %s", tt.expectedValue, letStatement.Value)
 		}
 
 	}

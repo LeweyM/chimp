@@ -4,6 +4,7 @@ import (
 	"Chimp/Ast"
 	"Chimp/Lexer"
 	"Chimp/Token"
+	"strconv"
 )
 
 type Parser struct {
@@ -36,9 +37,14 @@ func (p *Parser) parseStatement() Ast.Statement {
 }
 
 func (p *Parser) parseExpression() Ast.Expression {
+	p.AdvanceTokens()
 	switch p.curToken.Type {
 	case Token.INT:
-		return &Ast.IntegerExpression{Token: p.curToken, Value: int64(999)}
+		i, err := strconv.Atoi(p.curToken.Literal)
+		if err != nil {
+			// err
+		}
+		return &Ast.IntegerExpression{Token: p.curToken, Value: int64(i)}
 	default:
 		return nil
 	}
@@ -49,15 +55,19 @@ func (p *Parser) ParseLetStatement() *Ast.LetStatement {
 	if p.AdvanceTokens(); p.curToken.Type != Token.IDENT {
 		// err
 	}
-	return &Ast.LetStatement{
+	statement := &Ast.LetStatement{
 		Token: letToken,
 		Name:  p.parseIdentExpression(),
 		Value: p.parseExpression(),
 	}
+	return statement
 }
 
 func (p *Parser) parseIdentExpression() Ast.IdentityExpression {
 	token := p.curToken
+	if p.AdvanceTokens(); p.curToken.Type != Token.ASSIGN {
+		// err
+	}
 	return Ast.IdentityExpression{
 		Token: token,
 		Value: token.Literal,
