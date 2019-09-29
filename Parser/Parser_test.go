@@ -13,9 +13,10 @@ func TestParseLetStatement(t *testing.T) {
 		expectedToken Token.Token
 		expectedName  Ast.Expression
 		expectedValue Ast.Expression
+		expectedErrors []string
 	}{
 		{
-			input:         "let five = 5",
+			input:         "let five = 5;",
 			expectedToken: Token.Token{Type: Token.LET, Literal: "let"},
 			expectedName: Ast.IdentityExpression{
 				Token: Token.Token{Type: Token.IDENT, Literal: "five"},
@@ -25,6 +26,7 @@ func TestParseLetStatement(t *testing.T) {
 				Token: Token.Token{Type: Token.INT, Literal: "5"},
 				Value: 5,
 			},
+			expectedErrors: []string{},
 		}, {
 			input:         "let foo = 67",
 			expectedToken: Token.Token{Type: Token.LET, Literal: "let"},
@@ -36,6 +38,7 @@ func TestParseLetStatement(t *testing.T) {
 				Token: Token.Token{Type: Token.INT, Literal: "67"},
 				Value: 67,
 			},
+			expectedErrors: []string{},
 		},
 	}
 
@@ -55,6 +58,8 @@ func TestParseLetStatement(t *testing.T) {
 		if !ok {
 			t.Fatal("Not of type LetStatement")
 		}
+
+		checkForErrors(p, t)
 
 		if tt.expectedToken.Type != letStatement.Token.Type {
 			t.Fatalf("Expected type of %s, got %s", tt.expectedToken.Type, letStatement.Token.Type)
@@ -87,5 +92,15 @@ func TestParseLetStatement(t *testing.T) {
 			t.Fatalf("Expected value of %s, got %s", tt.expectedValue, letStatement.Value)
 		}
 
+	}
+}
+
+func checkForErrors(p *Parser, t *testing.T) {
+	if len(p.errors) > 0 {
+		t.Errorf("%d errors found.\n", len(p.errors))
+		for _, msg := range p.errors {
+			t.Fatalf("Error: %s", msg)
+		}
+		t.FailNow()
 	}
 }

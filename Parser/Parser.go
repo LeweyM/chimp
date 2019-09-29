@@ -4,19 +4,42 @@ import (
 	"Chimp/Ast"
 	"Chimp/Lexer"
 	"Chimp/Token"
+	"fmt"
 	"strconv"
 )
 
 type Parser struct {
-	l        Lexer.Lexer
-	curToken Token.Token
+	l         Lexer.Lexer
+	curToken  Token.Token
+	peekToken Token.Token
+	errors    []string
+}
+
+func New(l Lexer.Lexer) *Parser {
+	p := Parser{l: l}
+	p.errors = []string{}
+	p.AdvanceTokens()
+	return &p
+}
+
+func (p *Parser) AdvanceTokens() {
+	p.curToken = p.peekToken
+	p.peekToken = p.l.NextToken()
+}
+
+func (p *Parser) currentToken() Token.Token {
+	return p.curToken
+}
+
+func (p *Parser) getPeekToken() Token.Token {
+	return p.peekToken
 }
 
 func (p *Parser) ParseProgramme() Ast.Programme {
 	programme := Ast.Programme{}
 	programme.Statements = []Ast.Statement{}
 
-	for p.curToken.Type != Token.EOF {
+	for p.currentToken().Type != Token.EOF {
 		if statement := p.parseStatement(); statement != nil {
 			programme.Statements = append(programme.Statements, statement)
 		}
@@ -28,7 +51,7 @@ func (p *Parser) ParseProgramme() Ast.Programme {
 }
 
 func (p *Parser) parseStatement() Ast.Statement {
-	switch p.curToken.Type {
+	switch p.currentToken().Type {
 	case Token.LET:
 		return p.ParseLetStatement()
 	default:
@@ -38,48 +61,48 @@ func (p *Parser) parseStatement() Ast.Statement {
 
 func (p *Parser) parseExpression() Ast.Expression {
 	p.AdvanceTokens()
-	switch p.curToken.Type {
+	switch p.currentToken().Type {
 	case Token.INT:
-		i, err := strconv.Atoi(p.curToken.Literal)
+		i, err := strconv.Atoi(p.currentToken().Literal)
 		if err != nil {
 			// err
+			return nil
 		}
-		return &Ast.IntegerExpression{Token: p.curToken, Value: int64(i)}
+		return &Ast.IntegerExpression{Token: p.currentToken(), Value: int64(i)}
 	default:
 		return nil
 	}
 }
 
 func (p *Parser) ParseLetStatement() *Ast.LetStatement {
-	letToken := p.curToken
-	if p.AdvanceTokens(); p.curToken.Type != Token.IDENT {
-		// err
+	letToken := p.currentToken()
+
+	if p.AdvanceTokens(); p.currentToken().Type != Token.IDENT {
+		p.errors = append(p.errors, fmt.Sprintf("expected IDENT, but received '%s'", p.currentToken().Literal))
+		return nil
 	}
+
+	if p.getPeekToken().Type != Token.ASSIGN {
+		p.errors = append(p.errors, fmt.Sprintf("expected '=', but received '%s'", p.currentToken().Literal))
+		return nil
+	}
+
 	statement := &Ast.LetStatement{
 		Token: letToken,
-		Name:  p.parseIdentExpression(),
+		Name:  *p.parseIdentExpression(),
 		Value: p.parseExpression(),
 	}
 	return statement
 }
 
-func (p *Parser) parseIdentExpression() Ast.IdentityExpression {
-	token := p.curToken
-	if p.AdvanceTokens(); p.curToken.Type != Token.ASSIGN {
-		// err
+func (p *Parser) parseIdentExpression() *Ast.IdentityExpression {
+	token := p.currentToken()
+	if p.AdvanceTokens(); p.currentToken().Type != Token.ASSIGN {
+		p.errors = append(p.errors, fmt.Sprintf("expected '=', but received '%s'", p.currentToken().Literal))
+		return nil
 	}
-	return Ast.IdentityExpression{
+	return &Ast.IdentityExpression{
 		Token: token,
 		Value: token.Literal,
 	}
-}
-
-func New(l Lexer.Lexer) *Parser {
-	p := Parser{l: l}
-	p.AdvanceTokens()
-	return &p
-}
-
-func (p *Parser) AdvanceTokens() {
-	p.curToken = p.l.NextToken()
 }
