@@ -5,8 +5,9 @@ import (
 )
 
 var keywords = map[string]Token.TokenType{
-	"fun": Token.FUNCTION,
-	"let": Token.LET,
+	"fun":    Token.FUNCTION,
+	"let":    Token.LET,
+	"return": Token.RETURN,
 }
 
 type Lexer struct {

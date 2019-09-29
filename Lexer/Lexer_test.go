@@ -10,7 +10,7 @@ func TestNextToken(t *testing.T) {
 		=;{}(),+!
 		let myVar =   99
 		let plus = fun(x, y) {
-			x + y
+			return x + y
 		}
 		6 - 5; 10 > 2 < 3
 `
@@ -42,6 +42,7 @@ func TestNextToken(t *testing.T) {
 		{Token.IDENT, "y"},
 		{Token.RBRACE, ")"},
 		{Token.LPAREN, "{"},
+		{Token.RETURN, "return"},
 		{Token.IDENT, "x"},
 		{Token.PLUS, "+"},
 		{Token.IDENT, "y"},

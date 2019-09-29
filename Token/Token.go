@@ -12,6 +12,7 @@ const (
 	ILLEGAL = "ILLEGAL"
 
 	FUNCTION = "FUN"
+	RETURN   = "RETURN"
 	LET      = "LET"
 	IDENT    = "IDENT"
 	INT      = "INT"

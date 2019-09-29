@@ -95,11 +95,28 @@ func TestParseLetStatement(t *testing.T) {
 	}
 }
 
+func TestParseReturnStatements(t *testing.T) {
+	input := `
+		return 5;
+		return 500;
+	`
+
+	l := *Lexer.New(input)
+	p := New(l)
+
+	programme := p.ParseProgramme()
+	checkForErrors(p, t)
+
+	if len(programme.Statements) != 2 {
+		t.Fatalf("expected 2 statments, found %d", len(programme.Statements))
+	}
+}
+
 func checkForErrors(p *Parser, t *testing.T) {
 	if len(p.errors) > 0 {
 		t.Errorf("%d errors found.\n", len(p.errors))
 		for _, msg := range p.errors {
-			t.Fatalf("Error: %s", msg)
+			t.Errorf("Error: %s", msg)
 		}
 		t.FailNow()
 	}

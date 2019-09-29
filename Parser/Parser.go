@@ -19,6 +19,7 @@ func New(l Lexer.Lexer) *Parser {
 	p := Parser{l: l}
 	p.errors = []string{}
 	p.AdvanceTokens()
+	p.AdvanceTokens()
 	return &p
 }
 
@@ -54,6 +55,8 @@ func (p *Parser) parseStatement() Ast.Statement {
 	switch p.currentToken().Type {
 	case Token.LET:
 		return p.ParseLetStatement()
+	case Token.RETURN:
+		return p.parseReturnStatement()
 	default:
 		return nil
 	}
@@ -65,10 +68,11 @@ func (p *Parser) parseExpression() Ast.Expression {
 	case Token.INT:
 		i, err := strconv.Atoi(p.currentToken().Literal)
 		if err != nil {
-			// err
+			p.errors = append(p.errors, "Non number in INT value")
 			return nil
 		}
-		return &Ast.IntegerExpression{Token: p.currentToken(), Value: int64(i)}
+		expression := &Ast.IntegerExpression{Token: p.currentToken(), Value: int64(i)}
+		return expression
 	default:
 		return nil
 	}
@@ -104,5 +108,16 @@ func (p *Parser) parseIdentExpression() *Ast.IdentityExpression {
 	return &Ast.IdentityExpression{
 		Token: token,
 		Value: token.Literal,
+	}
+}
+
+func (p *Parser) parseReturnStatement() *Ast.ReturnStatement {
+	returnToken := p.currentToken()
+
+	//p.parseExpression()
+
+	return &Ast.ReturnStatement{
+		Token: returnToken,
+		Value: nil,
 	}
 }
