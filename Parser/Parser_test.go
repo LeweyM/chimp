@@ -9,10 +9,10 @@ import (
 
 func TestParseLetStatement(t *testing.T) {
 	var tests = []struct {
-		input         string
-		expectedToken Token.Token
-		expectedName  Ast.Expression
-		expectedValue Ast.Expression
+		input          string
+		expectedToken  Token.Token
+		expectedName   Ast.Expression
+		expectedValue  Ast.Expression
 		expectedErrors []string
 	}{
 		{
@@ -101,6 +101,8 @@ func TestParseReturnStatements(t *testing.T) {
 		return 500;
 	`
 
+	values := []int64{5, 500}
+
 	l := *Lexer.New(input)
 	p := New(l)
 
@@ -109,6 +111,23 @@ func TestParseReturnStatements(t *testing.T) {
 
 	if len(programme.Statements) != 2 {
 		t.Fatalf("expected 2 statments, found %d", len(programme.Statements))
+	}
+
+	for i, statement := range programme.Statements {
+
+		returnStatement, ok := statement.(*Ast.ReturnStatement)
+		if !ok {
+			t.Fatalf("statement %d is not a return statement", i)
+		}
+
+		intExpression, ok := returnStatement.Value.(*Ast.IntegerExpression)
+		if !ok {
+			t.Fatalf("statement %d value is not an integer expression", i)
+		}
+
+		if intExpression.Value != values[i] {
+			t.Fatalf("statement %d expected value is %d, got %d", i, values[i], intExpression.Value)
+		}
 	}
 }
 

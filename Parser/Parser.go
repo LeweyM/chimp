@@ -101,10 +101,12 @@ func (p *Parser) ParseLetStatement() *Ast.LetStatement {
 
 func (p *Parser) parseIdentExpression() *Ast.IdentityExpression {
 	token := p.currentToken()
+
 	if p.AdvanceTokens(); p.currentToken().Type != Token.ASSIGN {
 		p.errors = append(p.errors, fmt.Sprintf("expected '=', but received '%s'", p.currentToken().Literal))
 		return nil
 	}
+
 	return &Ast.IdentityExpression{
 		Token: token,
 		Value: token.Literal,
@@ -114,10 +116,10 @@ func (p *Parser) parseIdentExpression() *Ast.IdentityExpression {
 func (p *Parser) parseReturnStatement() *Ast.ReturnStatement {
 	returnToken := p.currentToken()
 
-	//p.parseExpression()
+	valueExpression := p.parseExpression()
 
 	return &Ast.ReturnStatement{
 		Token: returnToken,
-		Value: nil,
+		Value: valueExpression,
 	}
 }
