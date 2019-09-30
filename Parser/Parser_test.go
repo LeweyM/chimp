@@ -57,11 +57,13 @@ func TestParseInfixExpression(t *testing.T) {
 	input := `
 		5 + 1;
 		8 - 5;
+		1 * 2;
 		1 + 2 + 3;
 	`
 	output := []string{
 		"(5 + 1)",
 		"(8 - 5)",
+		"(1 * 2)",
 		"(1 + (2 + 3))",
 	}
 
@@ -71,8 +73,8 @@ func TestParseInfixExpression(t *testing.T) {
 	programme := p.ParseProgramme()
 	checkForErrors(p, t)
 
-	if len(programme.Statements) != 3 {
-		t.Fatalf("Expected 3 statements, got %d", len(programme.Statements))
+	if len(programme.Statements) != 4 {
+		t.Fatalf("Expected 4 statements, got %d", len(programme.Statements))
 	}
 
 	for i, statement := range programme.Statements {

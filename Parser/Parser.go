@@ -25,6 +25,7 @@ func New(l Lexer.Lexer) *Parser {
 	p.infixRegistry = make(map[Token.TokenType]interface{})
 	p.infixRegistry[Token.PLUS] = p.parseInfixExpression
 	p.infixRegistry[Token.MINUS] = p.parseInfixExpression
+	p.infixRegistry[Token.MULTIPLY] = p.parseInfixExpression
 
 	return &p
 }
