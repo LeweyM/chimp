@@ -25,6 +25,7 @@ func New(l Lexer.Lexer) *Parser {
 	p.infixRegistry = make(map[Token.TokenType]interface{})
 	p.infixRegistry[Token.PLUS] = p.parseInfixExpression
 	p.infixRegistry[Token.MINUS] = p.parseInfixExpression
+
 	return &p
 }
 
@@ -156,7 +157,7 @@ func (p *Parser) parseInfixExpression() *Ast.InfixExpression {
 	p.AdvanceTokens()
 	operator := p.currentToken().Literal
 	p.AdvanceTokens()
-	right := p.parseIntegerExpression()
+	right := p.parseExpression()
 
 	return &Ast.InfixExpression{
 		Token:           Token.Token{},

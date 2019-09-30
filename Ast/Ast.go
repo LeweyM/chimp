@@ -1,6 +1,9 @@
 package Ast
 
-import "Chimp/Token"
+import (
+	"Chimp/Token"
+	"fmt"
+)
 
 type Programme struct {
 	Statements []Statement
@@ -17,6 +20,7 @@ type Statement interface {
 type Expression interface {
 	Node
 	expressionNode()
+	ToString() string
 }
 
 type IntegerExpression struct {
@@ -26,6 +30,9 @@ type IntegerExpression struct {
 
 func (ie IntegerExpression) TokenLiteral() string { return ie.Token.Literal }
 func (ie IntegerExpression) expressionNode()      {}
+func (ie IntegerExpression) ToString() string {
+	return ie.Token.Literal
+}
 
 type InfixExpression struct {
 	Token           Token.Token
@@ -36,6 +43,12 @@ type InfixExpression struct {
 
 func (ie InfixExpression) TokenLiteral() string { return ie.Token.Literal }
 func (ie InfixExpression) expressionNode()      {}
+func (ie InfixExpression) ToString() string {
+	return fmt.Sprintf("(%s %s %s)",
+		ie.LeftExpression.ToString(),
+		ie.Operator,
+		ie.RightExpression.ToString())
+}
 
 type IdentityExpression struct {
 	Token Token.Token

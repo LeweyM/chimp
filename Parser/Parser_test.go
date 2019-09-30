@@ -56,11 +56,14 @@ func TestParseLetStatement(t *testing.T) {
 func TestParseInfixExpression(t *testing.T) {
 	input := `
 		5 + 1;
-		8 - 5
+		8 - 5;
+		1 + 2 + 3;
 	`
-	left := []string{"5", "8"}
-	right := []string{"1", "5"}
-	infix := []string{"+", "-"}
+	output := []string{
+		"(5 + 1)",
+		"(8 - 5)",
+		"(1 + (2 + 3))",
+	}
 
 	l := Lexer.New(input)
 	p := New(*l)
@@ -68,8 +71,8 @@ func TestParseInfixExpression(t *testing.T) {
 	programme := p.ParseProgramme()
 	checkForErrors(p, t)
 
-	if len(programme.Statements) != 2 {
-		t.Fatalf("Expected 2 statements, got %d", len(programme.Statements))
+	if len(programme.Statements) != 3 {
+		t.Fatalf("Expected 3 statements, got %d", len(programme.Statements))
 	}
 
 	for i, statement := range programme.Statements {
@@ -84,18 +87,10 @@ func TestParseInfixExpression(t *testing.T) {
 			t.Fatal("Not of type infixExpression")
 		}
 
-		if infixExpression.LeftExpression.TokenLiteral() != left[i] {
-			t.Fatalf("Expected left to be %s, got %s", left[i], infixExpression.LeftExpression.TokenLiteral())
+		if infixExpression.ToString() != output[i] {
+			t.Fatalf("Expected output to be %s, got %s", output[i], infixExpression.ToString())
 		}
-		if infixExpression.RightExpression.TokenLiteral() != right[i] {
-			t.Fatalf("Expected right to be %s, got %s", right[i], infixExpression.RightExpression.TokenLiteral())
-		}
-		if infixExpression.Operator != infix[i] {
-			t.Fatalf("Expected operator to be %s, got %s", infix[i], infixExpression.Operator)
-		}
-
 	}
-
 }
 
 func TestParseReturnStatements(t *testing.T) {
