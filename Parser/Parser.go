@@ -9,10 +9,11 @@ import (
 )
 
 type Parser struct {
-	l         Lexer.Lexer
-	curToken  Token.Token
-	peekToken Token.Token
-	errors    []string
+	l             Lexer.Lexer
+	curToken      Token.Token
+	peekToken     Token.Token
+	errors        []string
+	infixRegistry map[Token.TokenType]interface{}
 }
 
 func New(l Lexer.Lexer) *Parser {
@@ -20,6 +21,10 @@ func New(l Lexer.Lexer) *Parser {
 	p.errors = []string{}
 	p.AdvanceTokens()
 	p.AdvanceTokens()
+
+	p.infixRegistry = make(map[Token.TokenType]interface{})
+	p.infixRegistry[Token.PLUS] = p.parseInfixExpression
+	p.infixRegistry[Token.MINUS] = p.parseInfixExpression
 	return &p
 }
 
@@ -63,13 +68,10 @@ func (p *Parser) parseStatement() Ast.Statement {
 }
 
 func (p *Parser) parseExpression() Ast.Expression {
-	infixRegistry := make(map[Token.TokenType]interface{})
-	infixRegistry[Token.PLUS] = p.parseInfixExpression
-	infixRegistry[Token.MINUS] = p.parseInfixExpression
 
 	switch p.currentToken().Type {
 	case Token.INT:
-		if infix := infixRegistry[p.getPeekToken().Type]; infix != nil {
+		if infix := p.infixRegistry[p.getPeekToken().Type]; infix != nil {
 			return p.parseInfixExpression()
 		}
 		return p.parseIntegerExpression()
