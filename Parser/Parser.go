@@ -58,21 +58,20 @@ func (p *Parser) parseStatement() Ast.Statement {
 	case Token.RETURN:
 		return p.parseReturnStatement()
 	default:
+		return p.parseExpressionStatement()
+		//parse expression statement
 		return nil
 	}
 }
 
 func (p *Parser) parseExpression() Ast.Expression {
-	p.AdvanceTokens()
 	switch p.currentToken().Type {
 	case Token.INT:
-		i, err := strconv.Atoi(p.currentToken().Literal)
-		if err != nil {
-			p.errors = append(p.errors, "Non number in INT value")
-			return nil
+		if p.getPeekToken().Type == Token.PLUS {
+			return p.parseInfixExpression()
+		} else {
+			return p.parseIntegerExpression()
 		}
-		expression := &Ast.IntegerExpression{Token: p.currentToken(), Value: int64(i)}
-		return expression
 	default:
 		return nil
 	}
@@ -96,16 +95,28 @@ func (p *Parser) ParseLetStatement() *Ast.LetStatement {
 		Name:  *p.parseIdentExpression(),
 		Value: p.parseExpression(),
 	}
+
+	p.ignoreUntilSemicolon()
+
 	return statement
+}
+
+func (p *Parser) ignoreUntilSemicolon() {
+	for p.currentToken().Type != Token.SEMICOLON && p.currentToken().Type != Token.EOF {
+		p.AdvanceTokens()
+	}
 }
 
 func (p *Parser) parseIdentExpression() *Ast.IdentityExpression {
 	token := p.currentToken()
 
-	if p.AdvanceTokens(); p.currentToken().Type != Token.ASSIGN {
+	if p.getPeekToken().Type != Token.ASSIGN {
 		p.errors = append(p.errors, fmt.Sprintf("expected '=', but received '%s'", p.currentToken().Literal))
 		return nil
 	}
+
+	p.AdvanceTokens()
+	p.AdvanceTokens()
 
 	return &Ast.IdentityExpression{
 		Token: token,
@@ -116,10 +127,50 @@ func (p *Parser) parseIdentExpression() *Ast.IdentityExpression {
 func (p *Parser) parseReturnStatement() *Ast.ReturnStatement {
 	returnToken := p.currentToken()
 
+	p.AdvanceTokens()
+
 	valueExpression := p.parseExpression()
+
+	p.ignoreUntilSemicolon()
 
 	return &Ast.ReturnStatement{
 		Token: returnToken,
 		Value: valueExpression,
 	}
+}
+
+func (p *Parser) parseIntegerExpression() *Ast.IntegerExpression {
+	i, err := strconv.Atoi(p.currentToken().Literal)
+	if err != nil {
+		p.errors = append(p.errors, "Non number in INT value")
+		return nil
+	}
+	return &Ast.IntegerExpression{Token: p.currentToken(), Value: int64(i)}
+}
+
+func (p *Parser) parseInfixExpression() *Ast.InfixExpression {
+	left := p.parseIntegerExpression()
+	p.AdvanceTokens()
+	operator := p.currentToken().Literal
+	p.AdvanceTokens()
+	right := p.parseIntegerExpression()
+
+	return &Ast.InfixExpression{
+		Token:           Token.Token{},
+		Operator:        operator,
+		LeftExpression:  left,
+		RightExpression: right,
+	}
+}
+
+func (p *Parser) parseExpressionStatement() Ast.ExpressionStatement {
+
+	statement := Ast.ExpressionStatement{
+		Token: Token.Token{},
+		Value: p.parseExpression(),
+	}
+
+	p.ignoreUntilSemicolon()
+
+	return statement
 }
