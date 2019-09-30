@@ -59,19 +59,20 @@ func (p *Parser) parseStatement() Ast.Statement {
 		return p.parseReturnStatement()
 	default:
 		return p.parseExpressionStatement()
-		//parse expression statement
-		return nil
 	}
 }
 
 func (p *Parser) parseExpression() Ast.Expression {
+	infixRegistry := make(map[Token.TokenType]interface{})
+	infixRegistry[Token.PLUS] = p.parseInfixExpression
+	infixRegistry[Token.MINUS] = p.parseInfixExpression
+
 	switch p.currentToken().Type {
 	case Token.INT:
-		if p.getPeekToken().Type == Token.PLUS {
+		if infix := infixRegistry[p.getPeekToken().Type]; infix != nil {
 			return p.parseInfixExpression()
-		} else {
-			return p.parseIntegerExpression()
 		}
+		return p.parseIntegerExpression()
 	default:
 		return nil
 	}

@@ -56,11 +56,11 @@ func TestParseLetStatement(t *testing.T) {
 func TestParseInfixExpression(t *testing.T) {
 	input := `
 		5 + 1;
-		8 + 5
+		8 - 5
 	`
 	left := []string{"5", "8"}
 	right := []string{"1", "5"}
-	infix := []string{"+", "+"}
+	infix := []string{"+", "-"}
 
 	l := Lexer.New(input)
 	p := New(*l)
