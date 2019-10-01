@@ -28,6 +28,8 @@ func New(l Lexer.Lexer) *Parser {
 	p.advanceTokens()
 
 	p.infixRegistry = make(map[Token.TokenType]infixFunc)
+	p.infixRegistry[Token.EQ] = p.parseInfixExpression
+	p.infixRegistry[Token.NEQ] = p.parseInfixExpression
 	p.infixRegistry[Token.PLUS] = p.parseInfixExpression
 	p.infixRegistry[Token.MINUS] = p.parseInfixExpression
 	p.infixRegistry[Token.MULTIPLY] = p.parseInfixExpression
@@ -41,6 +43,8 @@ func New(l Lexer.Lexer) *Parser {
 	p.precedence["*"] = MULTI
 	p.precedence["+"] = SUM
 	p.precedence["-"] = SUM
+	p.precedence["=="] = EQUALS
+	p.precedence["!="] = EQUALS
 	p.precedence["LOWEST"] = LOWEST
 
 	return &p
@@ -48,6 +52,7 @@ func New(l Lexer.Lexer) *Parser {
 
 const (
 	LOWEST = iota
+	EQUALS
 	SUM
 	MULTI
 )
