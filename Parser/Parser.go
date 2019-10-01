@@ -13,8 +13,11 @@ type Parser struct {
 	curToken      Token.Token
 	peekToken     Token.Token
 	errors        []string
-	infixRegistry map[Token.TokenType]interface{}
+	infixRegistry map[Token.TokenType]infixFunc
+	precedence    map[string]int
 }
+
+type infixFunc = func(left Ast.Expression) *Ast.InfixExpression
 
 func New(l Lexer.Lexer) *Parser {
 	p := Parser{l: l}
@@ -22,13 +25,27 @@ func New(l Lexer.Lexer) *Parser {
 	p.AdvanceTokens()
 	p.AdvanceTokens()
 
-	p.infixRegistry = make(map[Token.TokenType]interface{})
+	p.infixRegistry = make(map[Token.TokenType]infixFunc)
 	p.infixRegistry[Token.PLUS] = p.parseInfixExpression
 	p.infixRegistry[Token.MINUS] = p.parseInfixExpression
 	p.infixRegistry[Token.MULTIPLY] = p.parseInfixExpression
+	p.infixRegistry[Token.DIVIDE] = p.parseInfixExpression
+
+	p.precedence = make(map[string]int)
+	p.precedence["/"] = MULTI
+	p.precedence["*"] = MULTI
+	p.precedence["+"] = SUM
+	p.precedence["-"] = SUM
+	p.precedence["LOWEST"] = LOWEST
 
 	return &p
 }
+
+const (
+	LOWEST = iota
+	SUM
+	MULTI
+	)
 
 func (p *Parser) AdvanceTokens() {
 	p.curToken = p.peekToken
@@ -69,17 +86,31 @@ func (p *Parser) parseStatement() Ast.Statement {
 	}
 }
 
-func (p *Parser) parseExpression() Ast.Expression {
-
+func (p *Parser) parseExpression(contextPrecedence int) Ast.Expression {
 	switch p.currentToken().Type {
 	case Token.INT:
-		if infix := p.infixRegistry[p.getPeekToken().Type]; infix != nil {
-			return p.parseInfixExpression()
+		operatorPres := p.getPeekPrecedence()
+		var leftExp Ast.Expression
+
+		leftExp = p.parseIntegerExpression()
+
+		for operatorPres > contextPrecedence {
+			infix := p.infixRegistry[p.getPeekToken().Type]
+			if infix == nil {
+				return leftExp
+			}
+			leftExp = infix(leftExp)
 		}
-		return p.parseIntegerExpression()
+
+		return leftExp
+
 	default:
 		return nil
 	}
+}
+
+func (p *Parser) getPeekPrecedence() int {
+	return p.precedence[p.getPeekToken().Literal]
 }
 
 func (p *Parser) ParseLetStatement() *Ast.LetStatement {
@@ -98,7 +129,7 @@ func (p *Parser) ParseLetStatement() *Ast.LetStatement {
 	statement := &Ast.LetStatement{
 		Token: letToken,
 		Name:  *p.parseIdentExpression(),
-		Value: p.parseExpression(),
+		Value: p.parseExpression(LOWEST),
 	}
 
 	p.ignoreUntilSemicolon()
@@ -134,7 +165,7 @@ func (p *Parser) parseReturnStatement() *Ast.ReturnStatement {
 
 	p.AdvanceTokens()
 
-	valueExpression := p.parseExpression()
+	valueExpression := p.parseExpression(LOWEST)
 
 	p.ignoreUntilSemicolon()
 
@@ -153,12 +184,14 @@ func (p *Parser) parseIntegerExpression() *Ast.IntegerExpression {
 	return &Ast.IntegerExpression{Token: p.currentToken(), Value: int64(i)}
 }
 
-func (p *Parser) parseInfixExpression() *Ast.InfixExpression {
-	left := p.parseIntegerExpression()
+func (p *Parser) parseInfixExpression(left Ast.Expression) *Ast.InfixExpression {
+	operator := p.getPeekToken().Literal
+	precedence := p.getPeekPrecedence()
+
 	p.AdvanceTokens()
-	operator := p.currentToken().Literal
 	p.AdvanceTokens()
-	right := p.parseExpression()
+
+	right := p.parseExpression(precedence)
 
 	return &Ast.InfixExpression{
 		Token:           Token.Token{},
@@ -172,7 +205,7 @@ func (p *Parser) parseExpressionStatement() Ast.ExpressionStatement {
 
 	statement := Ast.ExpressionStatement{
 		Token: Token.Token{},
-		Value: p.parseExpression(),
+		Value: p.parseExpression(LOWEST),
 	}
 
 	p.ignoreUntilSemicolon()

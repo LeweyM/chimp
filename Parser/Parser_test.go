@@ -56,15 +56,23 @@ func TestParseLetStatement(t *testing.T) {
 func TestParseInfixExpression(t *testing.T) {
 	input := `
 		5 + 1;
+		5 + 1 + 2;
 		8 - 5;
 		1 * 2;
 		1 + 2 + 3;
+		1 * 2 + 3;
+		5 + 8 / 4 - 2;
+		3 + 4 * 4 - 2 / 6 - 9;
 	`
 	output := []string{
 		"(5 + 1)",
+		"((5 + 1) + 2)",
 		"(8 - 5)",
 		"(1 * 2)",
-		"(1 + (2 + 3))",
+		"((1 + 2) + 3)",
+		"((1 * 2) + 3)",
+		"(5 + ((8 / 4) - 2))",
+		"(3 + ((4 * 4) - ((2 / 6) - 9)))",
 	}
 
 	l := Lexer.New(input)
@@ -73,8 +81,8 @@ func TestParseInfixExpression(t *testing.T) {
 	programme := p.ParseProgramme()
 	checkForErrors(p, t)
 
-	if len(programme.Statements) != 4 {
-		t.Fatalf("Expected 4 statements, got %d", len(programme.Statements))
+	if len(programme.Statements) != len(output) {
+		t.Fatalf("Expected %d statements, got %d", len(output), len(programme.Statements))
 	}
 
 	for i, statement := range programme.Statements {

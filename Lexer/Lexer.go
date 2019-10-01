@@ -41,6 +41,8 @@ func (l *Lexer) NextToken() Token.Token {
 		tok = newToken(Token.PLUS, "+")
 	case '*':
 		tok = newToken(Token.MULTIPLY, "*")
+	case '/':
+		tok = newToken(Token.DIVIDE, "/")
 	case '!':
 		if peekToken := l.peekToken(); peekToken == '=' {
 			tok = newToken(Token.NEQ, "!=")

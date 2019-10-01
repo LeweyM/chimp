@@ -7,7 +7,7 @@ import (
 
 func TestNextToken(t *testing.T) {
 	var input = `
-		=;{}(),+!
+		=;{}(),+!*/
 		let myVar =   99
 		let plus = fun(x, y) {
 			return x + y
@@ -28,6 +28,8 @@ func TestNextToken(t *testing.T) {
 		{Token.COMMA, ","},
 		{Token.PLUS, "+"},
 		{Token.BANG, "!"},
+		{Token.MULTIPLY, "*"},
+		{Token.DIVIDE, "/"},
 		{Token.LET, "let"},
 		{Token.IDENT, "myVar"},
 		{Token.ASSIGN, "="},
