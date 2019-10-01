@@ -28,6 +28,10 @@ func New(l Lexer.Lexer) *Parser {
 	p.advanceTokens()
 
 	p.infixRegistry = make(map[Token.TokenType]infixFunc)
+	p.infixRegistry[Token.GT] = p.parseInfixExpression
+	p.infixRegistry[Token.GTE] = p.parseInfixExpression
+	p.infixRegistry[Token.LT] = p.parseInfixExpression
+	p.infixRegistry[Token.LTE] = p.parseInfixExpression
 	p.infixRegistry[Token.EQ] = p.parseInfixExpression
 	p.infixRegistry[Token.NEQ] = p.parseInfixExpression
 	p.infixRegistry[Token.PLUS] = p.parseInfixExpression
@@ -43,6 +47,10 @@ func New(l Lexer.Lexer) *Parser {
 	p.precedence["*"] = MULTI
 	p.precedence["+"] = SUM
 	p.precedence["-"] = SUM
+	p.precedence[">"] = EQUALS
+	p.precedence[">="] = EQUALS
+	p.precedence["<"] = EQUALS
+	p.precedence["<="] = EQUALS
 	p.precedence["=="] = EQUALS
 	p.precedence["!="] = EQUALS
 	p.precedence["LOWEST"] = LOWEST
@@ -238,4 +246,3 @@ func (p *Parser) getPeekToken() Token.Token {
 func (p *Parser) getPeekPrecedence() int {
 	return p.precedence[p.getPeekToken().Literal]
 }
-

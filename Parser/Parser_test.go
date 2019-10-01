@@ -63,6 +63,8 @@ func TestParseInfixExpression(t *testing.T) {
 		1 * 2 + 3;
 		5 + 8 / 4 - 2;
 		3 + 4 * 4 - 2 / 6 - 9;
+		1 > 2 >= 4; 
+		5 < 1 <= 2; 
 	`
 	output := []string{
 		"(5 + (-1))",
@@ -73,6 +75,8 @@ func TestParseInfixExpression(t *testing.T) {
 		"((1 * 2) + 3)",
 		"(5 + ((8 / 4) - 2))",
 		"(3 + ((4 * 4) - ((2 / 6) - 9)))",
+		"((1 > 2) >= 4)",
+		"((5 < 1) <= 2)",
 	}
 
 	l := Lexer.New(input)
