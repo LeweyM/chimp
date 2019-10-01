@@ -50,6 +50,18 @@ func (ie InfixExpression) ToString() string {
 		ie.RightExpression.ToString())
 }
 
+type PrefixExpression struct {
+	Token      Token.Token
+	Operator   string
+	Expression Expression
+}
+
+func (pe PrefixExpression) TokenLiteral() string { return pe.Token.Literal }
+func (pe PrefixExpression) expressionNode()      {}
+func (pe PrefixExpression) ToString() string {
+	return fmt.Sprintf("(%s%s)", pe.Operator, pe.Expression.ToString())
+}
+
 type IdentityExpression struct {
 	Token Token.Token
 	Value string

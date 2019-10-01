@@ -55,9 +55,9 @@ func TestParseLetStatement(t *testing.T) {
 
 func TestParseInfixExpression(t *testing.T) {
 	input := `
-		5 + 1;
+		5 + -1;
 		5 + 1 + 2;
-		8 - 5;
+		-8 - 5;
 		1 * 2;
 		1 + 2 + 3;
 		1 * 2 + 3;
@@ -65,9 +65,9 @@ func TestParseInfixExpression(t *testing.T) {
 		3 + 4 * 4 - 2 / 6 - 9;
 	`
 	output := []string{
-		"(5 + 1)",
+		"(5 + (-1))",
 		"((5 + 1) + 2)",
-		"(8 - 5)",
+		"((-8) - 5)",
 		"(1 * 2)",
 		"((1 + 2) + 3)",
 		"((1 * 2) + 3)",
@@ -99,6 +99,42 @@ func TestParseInfixExpression(t *testing.T) {
 
 		if infixExpression.ToString() != output[i] {
 			t.Fatalf("Expected output to be %s, got %s", output[i], infixExpression.ToString())
+		}
+	}
+}
+
+func TestParsePrefixExpression(t *testing.T) {
+	input := `
+		-3;
+	`
+	output := []string{
+		"(-3)",
+	}
+
+	l := Lexer.New(input)
+	p := New(*l)
+
+	programme := p.ParseProgramme()
+	checkForErrors(p, t)
+
+	if len(programme.Statements) != len(output) {
+		t.Fatalf("Expected %d statements, got %d", len(output), len(programme.Statements))
+	}
+
+	for i, statement := range programme.Statements {
+
+		expressionStatement, ok := statement.(Ast.ExpressionStatement)
+		if !ok {
+			t.Fatal("Not of type ExpressionStatement")
+		}
+
+		prefixExpression, ok := expressionStatement.Value.(*Ast.PrefixExpression)
+		if !ok {
+			t.Fatal("Not of type prefixExpression")
+		}
+
+		if prefixExpression.ToString() != output[i] {
+			t.Fatalf("Expected output to be %s, got %s", output[i], prefixExpression.ToString())
 		}
 	}
 }

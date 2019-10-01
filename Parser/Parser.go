@@ -9,15 +9,17 @@ import (
 )
 
 type Parser struct {
-	l             Lexer.Lexer
-	curToken      Token.Token
-	peekToken     Token.Token
-	errors        []string
-	infixRegistry map[Token.TokenType]infixFunc
-	precedence    map[string]int
+	l              Lexer.Lexer
+	curToken       Token.Token
+	peekToken      Token.Token
+	errors         []string
+	infixRegistry  map[Token.TokenType]infixFunc
+	prefixRegistry map[Token.TokenType]prefixFunc
+	precedence     map[string]int
 }
 
 type infixFunc = func(left Ast.Expression) *Ast.InfixExpression
+type prefixFunc = func() *Ast.PrefixExpression
 
 func New(l Lexer.Lexer) *Parser {
 	p := Parser{l: l}
@@ -30,6 +32,9 @@ func New(l Lexer.Lexer) *Parser {
 	p.infixRegistry[Token.MINUS] = p.parseInfixExpression
 	p.infixRegistry[Token.MULTIPLY] = p.parseInfixExpression
 	p.infixRegistry[Token.DIVIDE] = p.parseInfixExpression
+
+	p.prefixRegistry = make(map[Token.TokenType]prefixFunc)
+	p.prefixRegistry[Token.MINUS] = p.parsePrefixExpression
 
 	p.precedence = make(map[string]int)
 	p.precedence["/"] = MULTI
@@ -45,14 +50,14 @@ const (
 	LOWEST = iota
 	SUM
 	MULTI
-	)
+)
 
 func (p *Parser) AdvanceTokens() {
 	p.curToken = p.peekToken
 	p.peekToken = p.l.NextToken()
 }
 
-func (p *Parser) currentToken() Token.Token {
+func (p *Parser) getCurrentToken() Token.Token {
 	return p.curToken
 }
 
@@ -64,7 +69,7 @@ func (p *Parser) ParseProgramme() Ast.Programme {
 	programme := Ast.Programme{}
 	programme.Statements = []Ast.Statement{}
 
-	for p.currentToken().Type != Token.EOF {
+	for p.getCurrentToken().Type != Token.EOF {
 		if statement := p.parseStatement(); statement != nil {
 			programme.Statements = append(programme.Statements, statement)
 		}
@@ -76,7 +81,7 @@ func (p *Parser) ParseProgramme() Ast.Programme {
 }
 
 func (p *Parser) parseStatement() Ast.Statement {
-	switch p.currentToken().Type {
+	switch p.getCurrentToken().Type {
 	case Token.LET:
 		return p.ParseLetStatement()
 	case Token.RETURN:
@@ -87,26 +92,26 @@ func (p *Parser) parseStatement() Ast.Statement {
 }
 
 func (p *Parser) parseExpression(contextPrecedence int) Ast.Expression {
-	switch p.currentToken().Type {
-	case Token.INT:
-		operatorPres := p.getPeekPrecedence()
-		var leftExp Ast.Expression
+	var leftExp Ast.Expression
 
+	prefix, ok := p.prefixRegistry[p.getCurrentToken().Type]
+	if !ok {
 		leftExp = p.parseIntegerExpression()
-
-		for operatorPres > contextPrecedence {
-			infix := p.infixRegistry[p.getPeekToken().Type]
-			if infix == nil {
-				return leftExp
-			}
-			leftExp = infix(leftExp)
-		}
-
-		return leftExp
-
-	default:
-		return nil
+	} else {
+		leftExp = prefix()
 	}
+
+	operatorPres := p.getPeekPrecedence()
+
+	for operatorPres > contextPrecedence {
+		infix := p.infixRegistry[p.getPeekToken().Type]
+		if infix == nil {
+			return leftExp
+		}
+		leftExp = infix(leftExp)
+	}
+
+	return leftExp
 }
 
 func (p *Parser) getPeekPrecedence() int {
@@ -114,15 +119,15 @@ func (p *Parser) getPeekPrecedence() int {
 }
 
 func (p *Parser) ParseLetStatement() *Ast.LetStatement {
-	letToken := p.currentToken()
+	letToken := p.getCurrentToken()
 
-	if p.AdvanceTokens(); p.currentToken().Type != Token.IDENT {
-		p.errors = append(p.errors, fmt.Sprintf("expected IDENT, but received '%s'", p.currentToken().Literal))
+	if p.AdvanceTokens(); p.getCurrentToken().Type != Token.IDENT {
+		p.errors = append(p.errors, fmt.Sprintf("expected IDENT, but received '%s'", p.getCurrentToken().Literal))
 		return nil
 	}
 
 	if p.getPeekToken().Type != Token.ASSIGN {
-		p.errors = append(p.errors, fmt.Sprintf("expected '=', but received '%s'", p.currentToken().Literal))
+		p.errors = append(p.errors, fmt.Sprintf("expected '=', but received '%s'", p.getCurrentToken().Literal))
 		return nil
 	}
 
@@ -138,16 +143,16 @@ func (p *Parser) ParseLetStatement() *Ast.LetStatement {
 }
 
 func (p *Parser) ignoreUntilSemicolon() {
-	for p.currentToken().Type != Token.SEMICOLON && p.currentToken().Type != Token.EOF {
+	for p.getCurrentToken().Type != Token.SEMICOLON && p.getCurrentToken().Type != Token.EOF {
 		p.AdvanceTokens()
 	}
 }
 
 func (p *Parser) parseIdentExpression() *Ast.IdentityExpression {
-	token := p.currentToken()
+	token := p.getCurrentToken()
 
 	if p.getPeekToken().Type != Token.ASSIGN {
-		p.errors = append(p.errors, fmt.Sprintf("expected '=', but received '%s'", p.currentToken().Literal))
+		p.errors = append(p.errors, fmt.Sprintf("expected '=', but received '%s'", p.getCurrentToken().Literal))
 		return nil
 	}
 
@@ -161,7 +166,7 @@ func (p *Parser) parseIdentExpression() *Ast.IdentityExpression {
 }
 
 func (p *Parser) parseReturnStatement() *Ast.ReturnStatement {
-	returnToken := p.currentToken()
+	returnToken := p.getCurrentToken()
 
 	p.AdvanceTokens()
 
@@ -176,12 +181,12 @@ func (p *Parser) parseReturnStatement() *Ast.ReturnStatement {
 }
 
 func (p *Parser) parseIntegerExpression() *Ast.IntegerExpression {
-	i, err := strconv.Atoi(p.currentToken().Literal)
+	i, err := strconv.Atoi(p.getCurrentToken().Literal)
 	if err != nil {
 		p.errors = append(p.errors, "Non number in INT value")
 		return nil
 	}
-	return &Ast.IntegerExpression{Token: p.currentToken(), Value: int64(i)}
+	return &Ast.IntegerExpression{Token: p.getCurrentToken(), Value: int64(i)}
 }
 
 func (p *Parser) parseInfixExpression(left Ast.Expression) *Ast.InfixExpression {
@@ -211,4 +216,20 @@ func (p *Parser) parseExpressionStatement() Ast.ExpressionStatement {
 	p.ignoreUntilSemicolon()
 
 	return statement
+}
+
+func (p *Parser) parsePrefixExpression() *Ast.PrefixExpression {
+	token := p.getCurrentToken()
+	p.AdvanceTokens()
+
+	return &Ast.PrefixExpression{
+		Token: Token.Token{
+			Type:    token.Type,
+			Literal: token.Literal,
+		},
+		Operator:   token.Literal,
+		Expression: p.parseIntegerExpression(),
+	}
+
+	return nil
 }
