@@ -18,15 +18,14 @@ type Parser struct {
 	precedence     map[string]int
 }
 
-type infixFunc = func(left Ast.Expression) *Ast.InfixExpression
-type prefixFunc = func() *Ast.PrefixExpression
+type infixFunc = func(left Ast.Expression) Ast.Expression
+type prefixFunc = func() Ast.Expression
 
 func New(l Lexer.Lexer) *Parser {
 	p := Parser{l: l}
 	p.errors = []string{}
 	p.advanceTokens()
 	p.advanceTokens()
-
 	p.infixRegistry = make(map[Token.TokenType]infixFunc)
 	p.infixRegistry[Token.GT] = p.parseInfixExpression
 	p.infixRegistry[Token.GTE] = p.parseInfixExpression
@@ -44,6 +43,7 @@ func New(l Lexer.Lexer) *Parser {
 	p.prefixRegistry[Token.MINUS] = p.parsePrefixExpression
 	p.prefixRegistry[Token.INCR] = p.parsePrefixExpression
 	p.prefixRegistry[Token.DECR] = p.parsePrefixExpression
+	p.prefixRegistry[Token.LBRACE] = p.parseBracePrefixExpression
 
 	p.precedence = make(map[string]int)
 	p.precedence["/"] = MULTI
@@ -194,7 +194,7 @@ func (p *Parser) parseIntegerExpression() *Ast.IntegerExpression {
 	return &Ast.IntegerExpression{Token: p.getCurrentToken(), Value: int64(i)}
 }
 
-func (p *Parser) parseInfixExpression(left Ast.Expression) *Ast.InfixExpression {
+func (p *Parser) parseInfixExpression(left Ast.Expression) Ast.Expression {
 	operator := p.getPeekToken().Literal
 	precedence := p.getPeekPrecedence()
 
@@ -203,7 +203,7 @@ func (p *Parser) parseInfixExpression(left Ast.Expression) *Ast.InfixExpression 
 
 	right := p.parseExpression(precedence)
 
-	return &Ast.InfixExpression{
+	return Ast.InfixExpression{
 		Token:           Token.Token{},
 		Operator:        operator,
 		LeftExpression:  left,
@@ -211,11 +211,11 @@ func (p *Parser) parseInfixExpression(left Ast.Expression) *Ast.InfixExpression 
 	}
 }
 
-func (p *Parser) parsePrefixExpression() *Ast.PrefixExpression {
+func (p *Parser) parsePrefixExpression() Ast.Expression {
 	token := p.getCurrentToken()
 	p.advanceTokens()
 
-	return &Ast.PrefixExpression{
+	return Ast.PrefixExpression{
 		Token: Token.Token{
 			Type:    token.Type,
 			Literal: token.Literal,
@@ -223,6 +223,14 @@ func (p *Parser) parsePrefixExpression() *Ast.PrefixExpression {
 		Operator:   token.Literal,
 		Expression: p.parseIntegerExpression(),
 	}
+}
+
+func (p *Parser) parseBracePrefixExpression() Ast.Expression {
+	p.advanceTokens()
+
+	expression := p.parseExpression(LOWEST)
+
+	return expression
 }
 
 func (p *Parser) ignoreUntilSemicolon() {

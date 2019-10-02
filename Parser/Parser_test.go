@@ -61,6 +61,7 @@ func TestParseInfixExpression(t *testing.T) {
 		1 * 2;
 		1 == 2 + 3;
 		1 * 2 + 3;
+		1 * (2 + 3);
 		5 + 8 / 4 - 2;
 		3 + 4 * 4 - 2 / 6 - 9;
 		1 > 2 >= 4; 
@@ -73,6 +74,7 @@ func TestParseInfixExpression(t *testing.T) {
 		"(1 * 2)",
 		"(1 == (2 + 3))",
 		"((1 * 2) + 3)",
+		"(1 * (2 + 3))",
 		"(5 + ((8 / 4) - 2))",
 		"(3 + ((4 * 4) - ((2 / 6) - 9)))",
 		"((1 > 2) >= 4)",
@@ -96,7 +98,7 @@ func TestParseInfixExpression(t *testing.T) {
 			t.Fatalf("statement %d Not of type ExpressionStatement", i )
 		}
 
-		infixExpression, ok := expressionStatement.Value.(*Ast.InfixExpression)
+		infixExpression, ok := expressionStatement.Value.(Ast.InfixExpression)
 		if !ok {
 			t.Fatalf("statement %d Not of type InfixExpression", i )
 		}
