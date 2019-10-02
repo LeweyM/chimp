@@ -230,6 +230,12 @@ func (p *Parser) parseBracePrefixExpression() Ast.Expression {
 
 	expression := p.parseExpression(LOWEST)
 
+	p.advanceTokens()
+
+	if p.getCurrentToken().Type != Token.RBRACE {
+		return nil
+	}
+
 	return expression
 }
 
