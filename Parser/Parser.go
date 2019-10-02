@@ -40,7 +40,10 @@ func New(l Lexer.Lexer) *Parser {
 	p.infixRegistry[Token.DIVIDE] = p.parseInfixExpression
 
 	p.prefixRegistry = make(map[Token.TokenType]prefixFunc)
+	p.prefixRegistry[Token.BANG] = p.parsePrefixExpression
 	p.prefixRegistry[Token.MINUS] = p.parsePrefixExpression
+	p.prefixRegistry[Token.INCR] = p.parsePrefixExpression
+	p.prefixRegistry[Token.DECR] = p.parsePrefixExpression
 
 	p.precedence = make(map[string]int)
 	p.precedence["/"] = MULTI
@@ -220,8 +223,6 @@ func (p *Parser) parsePrefixExpression() *Ast.PrefixExpression {
 		Operator:   token.Literal,
 		Expression: p.parseIntegerExpression(),
 	}
-
-	return nil
 }
 
 func (p *Parser) ignoreUntilSemicolon() {

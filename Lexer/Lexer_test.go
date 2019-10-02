@@ -13,6 +13,7 @@ func TestNextToken(t *testing.T) {
 			return x + y
 		}
 		6 - 5; 10 > 2 < 3
+		-- ++
 `
 
 	var tests = []struct {
@@ -58,6 +59,8 @@ func TestNextToken(t *testing.T) {
 		{Token.INT, "2"},
 		{Token.LT, "<"},
 		{Token.INT, "3"},
+		{Token.DECR, "--"},
+		{Token.INCR, "++"},
 		{Token.EOF, "EOF"},
 	}
 

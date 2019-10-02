@@ -93,12 +93,12 @@ func TestParseInfixExpression(t *testing.T) {
 
 		expressionStatement, ok := statement.(Ast.ExpressionStatement)
 		if !ok {
-			t.Fatal("Not of type ExpressionStatement")
+			t.Fatalf("statement %d Not of type ExpressionStatement", i )
 		}
 
 		infixExpression, ok := expressionStatement.Value.(*Ast.InfixExpression)
 		if !ok {
-			t.Fatal("Not of type infixExpression")
+			t.Fatalf("statement %d Not of type InfixExpression", i )
 		}
 
 		if infixExpression.ToString() != output[i] {
@@ -110,9 +110,15 @@ func TestParseInfixExpression(t *testing.T) {
 func TestParsePrefixExpression(t *testing.T) {
 	input := `
 		-3;
+		!5;
+		--4;
+		++100;
 	`
 	output := []string{
 		"(-3)",
+		"(!5)",
+		"(--4)",
+		"(++100)",
 	}
 
 	l := Lexer.New(input)

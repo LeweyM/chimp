@@ -24,7 +24,9 @@ const (
 	PLUS     = "+"
 	MINUS    = "-"
 	MULTIPLY = "*"
-	DIVIDE = "/"
+	INCR     = "++"
+	DECR     = "--"
+	DIVIDE   = "/"
 
 	GT  = ">"
 	LT  = "<"
