@@ -13,6 +13,8 @@ const (
 
 	FUNCTION = "FUN"
 	RETURN   = "RETURN"
+	IF       = "IF"
+	ELSE     = "ELSE"
 	LET      = "LET"
 	IDENT    = "IDENT"
 	INT      = "INT"

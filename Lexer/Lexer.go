@@ -7,6 +7,8 @@ import (
 var keywords = map[string]Token.TokenType{
 	"fun":    Token.FUNCTION,
 	"let":    Token.LET,
+	"if":     Token.IF,
+	"else":   Token.ELSE,
 	"return": Token.RETURN,
 }
 

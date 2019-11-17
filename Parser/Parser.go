@@ -87,8 +87,12 @@ func (p *Parser) parseStatement() Ast.Statement {
 	switch p.getCurrentToken().Type {
 	case Token.LET:
 		return p.parseLetStatement()
+	case Token.LPAREN:
+		return p.parseBlockStatement()
 	case Token.RETURN:
-		return p.parseReturnStatement()
+		return p.parseReturnStatement()	
+	case Token.IF:
+		return p.parseIfStatement()
 	default:
 		return p.parseExpressionStatement()
 	}
@@ -104,10 +108,12 @@ func (p *Parser) parseExpression(contextPrecedence int) Ast.Expression {
 		leftExp = prefix()
 	}
 
-	operatorPres := p.getPeekPrecedence()
+	p.advanceTokens()
+
+	operatorPres := p.getCurrentPrecedence()
 
 	for operatorPres > contextPrecedence {
-		infix := p.infixRegistry[p.getPeekToken().Type]
+		infix := p.infixRegistry[p.getCurrentToken().Type]
 		if infix == nil {
 			return leftExp
 		}
@@ -168,6 +174,48 @@ func (p *Parser) parseExpressionStatement() Ast.ExpressionStatement {
 	return statement
 }
 
+func (p *Parser) parseBlockStatement() Ast.BlockStatement {
+	token := p.getCurrentToken()
+	p.advanceTokens()
+
+	var statements []Ast.Statement
+	token = p.getCurrentToken()
+	for p.getCurrentToken().Type != Token.RPAREN && p.getCurrentToken().Type != Token.EOF {
+		statements = append(statements, p.parseStatement())
+		p.advanceTokens()
+	}
+
+	p.advanceTokens()
+
+	return Ast.BlockStatement{
+		Token:      token,
+		Statements: statements,
+	}
+}
+
+func (p *Parser) parseIfStatement() Ast.IfStatement {
+	token := p.getCurrentToken()
+	p.advanceTokens()
+
+	condition := p.parseExpression(LOWEST)
+
+	thenStatement := p.parseBlockStatement()
+
+	var elseStatement Ast.BlockStatement
+
+	if p.getCurrentToken().Type == Token.ELSE {
+		p.advanceTokens()
+		elseStatement = p.parseBlockStatement()
+	}
+
+	return Ast.IfStatement{
+		Token:     token,
+		Condition: condition,
+		Then:      thenStatement,
+		Else:      elseStatement,
+	}
+}
+
 func (p *Parser) parseIdentExpression() *Ast.IdentityExpression {
 	token := p.getCurrentToken()
 
@@ -195,14 +243,14 @@ func (p *Parser) parseIntegerExpression() *Ast.IntegerExpression {
 }
 
 func (p *Parser) parseInfixExpression(left Ast.Expression) Ast.Expression {
-	operator := p.getPeekToken().Literal
-	precedence := p.getPeekPrecedence()
+	operator := p.getCurrentToken().Literal
+	precedence := p.getCurrentPrecedence()
 
-	p.advanceTokens()
 	p.advanceTokens()
 
 	right := p.parseExpression(precedence)
 
+	// last token ends at right-expression
 	return Ast.InfixExpression{
 		Token:           Token.Token{},
 		Operator:        operator,
@@ -215,6 +263,7 @@ func (p *Parser) parsePrefixExpression() Ast.Expression {
 	token := p.getCurrentToken()
 	p.advanceTokens()
 
+	// last token at operand
 	return Ast.PrefixExpression{
 		Token: Token.Token{
 			Type:    token.Type,
@@ -230,12 +279,11 @@ func (p *Parser) parseBracePrefixExpression() Ast.Expression {
 
 	expression := p.parseExpression(LOWEST)
 
-	p.advanceTokens()
-
 	if p.getCurrentToken().Type != Token.RBRACE {
 		return nil
 	}
 
+	//last token at right brace
 	return expression
 }
 
@@ -260,4 +308,8 @@ func (p *Parser) getPeekToken() Token.Token {
 
 func (p *Parser) getPeekPrecedence() int {
 	return p.precedence[p.getPeekToken().Literal]
+}
+
+func (p *Parser) getCurrentPrecedence() int {
+	return p.precedence[p.getCurrentToken().Literal]
 }

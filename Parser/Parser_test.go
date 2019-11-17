@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func TestParseLetStatement(t *testing.T) {
+func TestParseLetStatements(t *testing.T) {
 	input := `
 		let foo = 67;
 		let five = 5;
@@ -53,34 +53,51 @@ func TestParseLetStatement(t *testing.T) {
 
 }
 
-func TestParseInfixExpression(t *testing.T) {
+func TestParseReturnStatements(t *testing.T) {
 	input := `
-		5 + -1;
-		5 != 1 + 2;
-		-8 - 5;
-		1 * 2;
-		1 == 2 + 3;
-		1 * 2 + 3;
+		return 5;
+		return 500;
+	`
+	values := []int64{5, 500}
+
+	l := *Lexer.New(input)
+	p := New(l)
+
+	programme := p.ParseProgramme()
+	checkForErrors(p, t)
+
+	if len(programme.Statements) != 2 {
+		t.Fatalf("expected 2 statments, found %d", len(programme.Statements))
+	}
+
+	for i, statement := range programme.Statements {
+
+		returnStatement, ok := statement.(*Ast.ReturnStatement)
+		if !ok {
+			t.Fatalf("statement %d is not a return statement", i)
+		}
+
+		intExpression, ok := returnStatement.Value.(*Ast.IntegerExpression)
+		if !ok {
+			t.Fatalf("statement %d value is not an integer expression", i)
+		}
+
+		if intExpression.Value != values[i] {
+			t.Fatalf("statement %d expected value is %d, got %d", i, values[i], intExpression.Value)
+		}
+	}
+}
+
+func TestParseInfixExpressions(t *testing.T) {
+	input := `
+		1 < 2;
+		1 + 2 * 3;
 		(1 * 2) + 3;
-		1 * (2 + 3);
-		5 + 8 / 4 - 2;
-		3 + 4 * 4 - 2 / 6 - 9;
-		1 > 2 >= 4; 
-		5 < 1 <= 2; 
 	`
 	output := []string{
-		"(5 + (-1))",
-		"(5 != (1 + 2))",
-		"((-8) - 5)",
-		"(1 * 2)",
-		"(1 == (2 + 3))",
+		"(1 < 2)",
+		"(1 + (2 * 3))",
 		"((1 * 2) + 3)",
-		"((1 * 2) + 3)",
-		"(1 * (2 + 3))",
-		"(5 + ((8 / 4) - 2))",
-		"(3 + ((4 * 4) - ((2 / 6) - 9)))",
-		"((1 > 2) >= 4)",
-		"((5 < 1) <= 2)",
 	}
 
 	l := Lexer.New(input)
@@ -111,7 +128,7 @@ func TestParseInfixExpression(t *testing.T) {
 	}
 }
 
-func TestParsePrefixExpression(t *testing.T) {
+func TestParsePrefixExpressions(t *testing.T) {
 	input := `
 		-3;
 		!5;
@@ -153,37 +170,35 @@ func TestParsePrefixExpression(t *testing.T) {
 	}
 }
 
-func TestParseReturnStatements(t *testing.T) {
+func TestParseIfStatements(t *testing.T) {
 	input := `
-		return 5;
-		return 500;
+		if (1 < 2) { return 2; } else { return 1; };
+		if (5 < 0) { return 8; };
 	`
-	values := []int64{5, 500}
+	output := []string{
+		"if (1 < 2) { return 2 } else { return 1 }",
+		"if (5 < 0) { return 8 }",
+	}
 
-	l := *Lexer.New(input)
-	p := New(l)
+	l := Lexer.New(input)
+	p := New(*l)
 
 	programme := p.ParseProgramme()
 	checkForErrors(p, t)
 
-	if len(programme.Statements) != 2 {
-		t.Fatalf("expected 2 statments, found %d", len(programme.Statements))
+	if len(programme.Statements) != len(output) {
+		t.Fatalf("Expected %d statements, got %d", len(output), len(programme.Statements))
 	}
 
 	for i, statement := range programme.Statements {
 
-		returnStatement, ok := statement.(*Ast.ReturnStatement)
+		ifStatement, ok := statement.(Ast.IfStatement)
 		if !ok {
-			t.Fatalf("statement %d is not a return statement", i)
+			t.Fatalf("Statement %d Not of type IfStatement", i)
 		}
 
-		intExpression, ok := returnStatement.Value.(*Ast.IntegerExpression)
-		if !ok {
-			t.Fatalf("statement %d value is not an integer expression", i)
-		}
-
-		if intExpression.Value != values[i] {
-			t.Fatalf("statement %d expected value is %d, got %d", i, values[i], intExpression.Value)
+		if ifStatement.ToString() != output[i] {
+			t.Fatalf("Statement %d: Expected:\n%s \ngot: \n%s", i, output[i], ifStatement.ToString())
 		}
 	}
 }

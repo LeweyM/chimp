@@ -3,6 +3,7 @@ package Ast
 import (
 	"Chimp/Token"
 	"fmt"
+	"strings"
 )
 
 type Programme struct {
@@ -16,6 +17,7 @@ type Node interface {
 type Statement interface {
 	Node
 	statementNode()
+	ToString() string
 }
 type Expression interface {
 	Node
@@ -77,6 +79,9 @@ type ExpressionStatement struct {
 
 func (ls ExpressionStatement) TokenLiteral() string { return ls.Token.Literal }
 func (ls ExpressionStatement) statementNode()       {}
+func (ls ExpressionStatement) ToString() string       {
+	return ""
+}
 
 type LetStatement struct {
 	Token Token.Token
@@ -86,6 +91,10 @@ type LetStatement struct {
 
 func (ls LetStatement) TokenLiteral() string { return ls.Token.Literal }
 func (ls LetStatement) statementNode()       {}
+func (ls LetStatement) ToString() string       {
+	return ""
+}
+
 
 type ReturnStatement struct {
 	Token Token.Token
@@ -94,3 +103,43 @@ type ReturnStatement struct {
 
 func (rs ReturnStatement) TokenLiteral() string { return rs.Token.Literal }
 func (rs ReturnStatement) statementNode()       {}
+func (rs ReturnStatement) ToString() string       {
+	return fmt.Sprintf("return %s", rs.Value.ToString())
+}
+
+type IfStatement struct {
+	Token     Token.Token
+	Condition Expression
+	Then      Statement
+	Else      Statement
+}
+
+func (is IfStatement) TokenLiteral() string { return is.Token.Literal }
+func (is IfStatement) statementNode()       {}
+func (is IfStatement) ToString() string {
+	res := fmt.Sprintf("if %s %s", is.Condition.ToString(), is.Then.ToString())
+	if is.Else.ToString() != "" {
+		res += fmt.Sprintf(" else %s", is.Else.ToString())
+	}
+	return res
+}
+
+type BlockStatement struct {
+	Token      Token.Token
+	Statements []Statement
+}
+
+func (bs BlockStatement) TokenLiteral() string { return bs.Token.Literal }
+func (bs BlockStatement) statementNode()       {}
+func (bs BlockStatement) ToString() string {
+	if len(bs.Statements) == 0 {
+		return ""
+	}
+	builder := strings.Builder{}
+	builder.WriteString("{ ")
+	for _, s := range bs.Statements {
+		builder.WriteString(s.ToString())
+	}
+	builder.WriteString(" }")
+	return builder.String()
+}
