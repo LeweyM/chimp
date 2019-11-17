@@ -2,12 +2,23 @@ package Ast
 
 import (
 	"Chimp/Token"
+	"bytes"
 	"fmt"
 	"strings"
 )
 
 type Programme struct {
 	Statements []Statement
+}
+
+func (p Programme) ToString() string {
+	var out bytes.Buffer
+
+	for _, s := range p.Statements {
+		out.WriteString(s.ToString())
+	}
+
+	return out.String()
 }
 
 type Node interface {
@@ -80,7 +91,7 @@ type ExpressionStatement struct {
 func (ls ExpressionStatement) TokenLiteral() string { return ls.Token.Literal }
 func (ls ExpressionStatement) statementNode()       {}
 func (ls ExpressionStatement) ToString() string       {
-	return ""
+	return ls.Value.ToString()
 }
 
 type LetStatement struct {
@@ -92,7 +103,7 @@ type LetStatement struct {
 func (ls LetStatement) TokenLiteral() string { return ls.Token.Literal }
 func (ls LetStatement) statementNode()       {}
 func (ls LetStatement) ToString() string       {
-	return ""
+	return fmt.Sprintf("%v = %v", ls.Name.Value, ls.Value.ToString())
 }
 
 
