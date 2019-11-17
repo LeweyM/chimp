@@ -1,6 +1,7 @@
 package Repl
 
 import (
+	"Chimp/Evaluator"
 	"Chimp/Lexer"
 	"Chimp/Parser"
 	"bufio"
@@ -24,8 +25,10 @@ func Start(in io.Reader, out io.Writer) {
 
 		programme := parser.ParseProgramme()
 
-		io.WriteString(out, "Parsed code: ")
-		io.WriteString(out, programme.ToString())
+		e := Evaluator.Eval(programme)
+
+		io.WriteString(out, "Evaluated code: ")
+		io.WriteString(out, e.Inspect())
 		io.WriteString(out, "\n")
 
 	}

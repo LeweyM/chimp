@@ -20,6 +20,9 @@ func (p Programme) ToString() string {
 
 	return out.String()
 }
+func (p Programme) TokenLiteral() string {
+	return "" //TODO
+}
 
 type Node interface {
 	TokenLiteral() string
