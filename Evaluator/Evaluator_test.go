@@ -24,6 +24,23 @@ func TestEvalInteger(t *testing.T) {
 
 }
 
+func TestInfixInteger(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected int64
+	}{
+		{"5 + 1", 6},
+		{"5 - 2", 3},
+	}
+
+	for _, tt := range tests {
+		evaluatedProgramme := evaluateTest(tt.input)
+
+		testInteger(evaluatedProgramme, t, tt.expected)
+	}
+
+}
+
 func testInteger(evaluatedProgramme Object.Object, t *testing.T, expected int64) {
 	integerObject, ok := evaluatedProgramme.(Object.Integer)
 	if !ok {
