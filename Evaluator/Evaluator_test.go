@@ -17,21 +17,26 @@ func TestEvalInteger(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		l := Lexer.New(tt.input)
-		p := Parser.New(*l)
-		programme := p.ParseProgramme()
-		evaluatedProgramme := Eval(programme)
+		evaluatedProgramme := evaluateTest(tt.input)
 
-		integerObject, ok := evaluatedProgramme.(Object.Integer)
-
-		if !ok {
-			t.Errorf("Object is not integer, is %s", integerObject.Type())
-		}
-
-		if integerObject.Value != tt.expected {
-			t.Errorf("object has wrong value, expected %d, got %d", tt.expected, integerObject.Value)
-		}
-
+		testInteger(evaluatedProgramme, t, tt.expected)
 	}
 
+}
+
+func testInteger(evaluatedProgramme Object.Object, t *testing.T, expected int64) {
+	integerObject, ok := evaluatedProgramme.(Object.Integer)
+	if !ok {
+		t.Errorf("Object is not integer, is %s", integerObject.Type())
+	}
+	if integerObject.Value != expected {
+		t.Errorf("object has wrong value, expected %d, got %d", expected, integerObject.Value)
+	}
+}
+
+func evaluateTest(input string) Object.Object {
+	l := Lexer.New(input)
+	p := Parser.New(*l)
+	programme := p.ParseProgramme()
+	return Eval(programme)
 }
