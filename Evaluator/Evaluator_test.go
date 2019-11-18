@@ -31,6 +31,8 @@ func TestInfixInteger(t *testing.T) {
 	}{
 		{"5 + 1", 6},
 		{"5 - 2", 3},
+		{"5 * 2 + 2", 12},
+		{"10 / 2 + 2", 7},
 	}
 
 	for _, tt := range tests {

@@ -42,6 +42,10 @@ func evalInfixInteger(operator string, leftInteger, rightInteger int64) Object.O
 		return Object.Integer{Value: leftInteger + rightInteger}
 	case "-":
 		return Object.Integer{Value: leftInteger - rightInteger}
+	case "*":
+		return Object.Integer{Value: leftInteger * rightInteger}
+	case "/":
+		return Object.Integer{Value: leftInteger / rightInteger}
 	}
 	return nil
 }
