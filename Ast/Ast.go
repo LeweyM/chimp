@@ -85,6 +85,10 @@ type IdentityExpression struct {
 
 func (ie IdentityExpression) TokenLiteral() string { return ie.Token.Literal }
 func (ie IdentityExpression) expressionNode()      {}
+func (ie IdentityExpression) ToString() string {
+	return fmt.Sprintf("%s", ie.Value,)
+}
+
 
 type ExpressionStatement struct {
 	Token Token.Token

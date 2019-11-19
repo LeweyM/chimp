@@ -7,6 +7,46 @@ import (
 	"testing"
 )
 
+func TestParseIdentExpressions(t *testing.T) {
+	input := `
+		foo;
+	`
+	literals := []string{"foo"}
+
+	l := Lexer.New(input)
+	p := New(*l)
+
+	programme := p.ParseProgramme()
+	checkForErrors(p, t)
+
+	if len(programme.Statements) != 1 {
+		t.Fatalf("Expected 1 statements, got %d", len(programme.Statements))
+	}
+
+	for i, statement := range programme.Statements {
+
+		expressionStatement, ok := statement.(Ast.ExpressionStatement)
+		if !ok {
+			t.Fatal("Not of type ExpressionStatement")
+		}
+
+		identExpression, ok := expressionStatement.Value.(*Ast.IdentityExpression)
+		if !ok {
+			t.Fatal("Not of type ExpressionStatement")
+		}
+
+		if identExpression.Token.Type != Token.IDENT {
+			t.Fatalf("Expected type of Ident, got %s", identExpression.Token.Type)
+		}
+
+		if identExpression.Value != literals[i] {
+			t.Fatalf("Expected identifier name of %s, got %s", literals[i], identExpression.Value)
+		}
+
+	}
+
+}
+
 func TestParseLetStatements(t *testing.T) {
 	input := `
 		let foo = 67;
@@ -93,11 +133,13 @@ func TestParseInfixExpressions(t *testing.T) {
 		1 < 2;
 		1 + 2 * 3;
 		(1 * 2) + 3;
+		foo + 5
 	`
 	output := []string{
 		"(1 < 2)",
 		"(1 + (2 * 3))",
 		"((1 * 2) + 3)",
+		"(foo + 5)",
 	}
 
 	l := Lexer.New(input)
@@ -117,7 +159,7 @@ func TestParseInfixExpressions(t *testing.T) {
 			t.Fatalf("statement %d Not of type ExpressionStatement", i )
 		}
 
-		infixExpression, ok := expressionStatement.Value.(Ast.InfixExpression)
+		infixExpression, ok := expressionStatement.Value.(*Ast.InfixExpression)
 		if !ok {
 			t.Fatalf("statement %d Not of type InfixExpression", i )
 		}

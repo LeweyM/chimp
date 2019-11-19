@@ -3,6 +3,7 @@ package Repl
 import (
 	"Chimp/Evaluator"
 	"Chimp/Lexer"
+	"Chimp/Object"
 	"Chimp/Parser"
 	"bufio"
 	"fmt"
@@ -11,6 +12,7 @@ import (
 
 func Start(in io.Reader, out io.Writer) {
 	scanner := bufio.NewScanner(in)
+	env := Object.NewEnvironment()
 
 	for {
 		fmt.Println("Go on...")
@@ -25,7 +27,7 @@ func Start(in io.Reader, out io.Writer) {
 
 		programme := parser.ParseProgramme()
 
-		e := Evaluator.Eval(programme)
+		e := Evaluator.Eval(programme, *env)
 
 		io.WriteString(out, "Evaluated code: ")
 		io.WriteString(out, e.Inspect())

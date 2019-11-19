@@ -39,6 +39,7 @@ func New(l Lexer.Lexer) *Parser {
 	p.infixRegistry[Token.DIVIDE] = p.parseInfixExpression
 
 	p.prefixRegistry = make(map[Token.TokenType]prefixFunc)
+	p.prefixRegistry[Token.IDENT] = p.parseIdentExpression
 	p.prefixRegistry[Token.BANG] = p.parsePrefixExpression
 	p.prefixRegistry[Token.MINUS] = p.parsePrefixExpression
 	p.prefixRegistry[Token.INCR] = p.parsePrefixExpression
@@ -131,15 +132,20 @@ func (p *Parser) parseLetStatement() *Ast.LetStatement {
 		return nil
 	}
 
+	identityExpression := *p.parseIdentExpression().(*Ast.IdentityExpression)
+
 	if p.getPeekToken().Type != Token.ASSIGN {
 		p.errors = append(p.errors, fmt.Sprintf("expected '=', but received '%s'", p.getCurrentToken().Literal))
 		return nil
 	}
+	p.advanceTokens()
+	p.advanceTokens()
+	valueExpression := p.parseExpression(LOWEST)
 
 	statement := &Ast.LetStatement{
 		Token: letToken,
-		Name:  *p.parseIdentExpression(),
-		Value: p.parseExpression(LOWEST),
+		Name:  identityExpression,
+		Value: valueExpression,
 	}
 
 	p.ignoreUntilSemicolon()
@@ -216,16 +222,8 @@ func (p *Parser) parseIfStatement() Ast.IfStatement {
 	}
 }
 
-func (p *Parser) parseIdentExpression() *Ast.IdentityExpression {
+func (p *Parser) parseIdentExpression() Ast.Expression {
 	token := p.getCurrentToken()
-
-	if p.getPeekToken().Type != Token.ASSIGN {
-		p.errors = append(p.errors, fmt.Sprintf("expected '=', but received '%s'", p.getCurrentToken().Literal))
-		return nil
-	}
-
-	p.advanceTokens()
-	p.advanceTokens()
 
 	return &Ast.IdentityExpression{
 		Token: token,
@@ -251,7 +249,7 @@ func (p *Parser) parseInfixExpression(left Ast.Expression) Ast.Expression {
 	right := p.parseExpression(precedence)
 
 	// last token ends at right-expression
-	return Ast.InfixExpression{
+	return &Ast.InfixExpression{
 		Token:           Token.Token{},
 		Operator:        operator,
 		LeftExpression:  left,
@@ -263,7 +261,6 @@ func (p *Parser) parsePrefixExpression() Ast.Expression {
 	token := p.getCurrentToken()
 	p.advanceTokens()
 
-	// last token at operand
 	return Ast.PrefixExpression{
 		Token: Token.Token{
 			Type:    token.Type,
@@ -272,6 +269,7 @@ func (p *Parser) parsePrefixExpression() Ast.Expression {
 		Operator:   token.Literal,
 		Expression: p.parseIntegerExpression(),
 	}
+	// last token handled pos by parseIntegerExpression
 }
 
 func (p *Parser) parseBracePrefixExpression() Ast.Expression {
@@ -283,8 +281,8 @@ func (p *Parser) parseBracePrefixExpression() Ast.Expression {
 		return nil
 	}
 
-	//last token at right brace
 	return expression
+	//last token pos at right brace
 }
 
 func (p *Parser) ignoreUntilSemicolon() {

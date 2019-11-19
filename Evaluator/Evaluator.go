@@ -5,15 +5,22 @@ import (
 	"Chimp/Object"
 )
 
-func Eval(node Ast.Node) Object.Object {
+func Eval(node Ast.Node, env Object.Environment) Object.Object {
 	switch node := node.(type) {
 	case Ast.Programme:
-		return evalStatements(node.Statements)
+		return evalStatements(node.Statements, env)
 	case Ast.ExpressionStatement:
-		return Eval(node.Value)
-
-	case Ast.InfixExpression:
-		return evalInfix(node)
+		return Eval(node.Value, env)
+	case *Ast.LetStatement:
+		env.Set(node.Name.Value, Eval(node.Value, env))
+		return Eval(node.Value, env)
+	case *Ast.IdentityExpression:
+		val, ok := env.Get(node.Value)
+		if ok {
+			return val
+		}
+	case *Ast.InfixExpression:
+		return evalInfix(node, env)
 	case *Ast.IntegerExpression:
 		return Object.Integer{Value: node.Value}
 	}
@@ -21,9 +28,9 @@ func Eval(node Ast.Node) Object.Object {
 	return nil
 }
 
-func evalInfix(infix Ast.InfixExpression) Object.Object {
-	left := Eval(infix.LeftExpression)
-	right := Eval(infix.RightExpression)
+func evalInfix(infix *Ast.InfixExpression, env Object.Environment) Object.Object {
+	left := Eval(infix.LeftExpression, env)
+	right := Eval(infix.RightExpression, env)
 
 	switch {
 	case left.Type() == Object.INTEGER_OBJ && right.Type() == Object.INTEGER_OBJ:
@@ -50,11 +57,11 @@ func evalInfixInteger(operator string, leftInteger, rightInteger int64) Object.O
 	return nil
 }
 
-func evalStatements(statements []Ast.Statement) Object.Object {
+func evalStatements(statements []Ast.Statement, env Object.Environment) Object.Object {
 	var eval Object.Object
 
 	for _, statement := range statements {
-		eval = Eval(statement)
+		eval = Eval(statement, env)
 	}
 
 	return eval

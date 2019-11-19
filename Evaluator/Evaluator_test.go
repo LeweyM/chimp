@@ -43,6 +43,23 @@ func TestInfixInteger(t *testing.T) {
 
 }
 
+func TestAssignment(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected int64
+	}{
+		//{"let foo = 5; foo", 5},
+		{"let foo = 5;foo + 1", 6},
+	}
+
+	for _, tt := range tests {
+		evaluatedProgramme := evaluateTest(tt.input)
+
+		testInteger(evaluatedProgramme, t, tt.expected)
+	}
+
+}
+
 func testInteger(evaluatedProgramme Object.Object, t *testing.T, expected int64) {
 	integerObject, ok := evaluatedProgramme.(Object.Integer)
 	if !ok {
@@ -57,5 +74,7 @@ func evaluateTest(input string) Object.Object {
 	l := Lexer.New(input)
 	p := Parser.New(*l)
 	programme := p.ParseProgramme()
-	return Eval(programme)
+	env := Object.NewEnvironment()
+
+	return Eval(programme, *env)
 }
