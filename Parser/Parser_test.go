@@ -201,7 +201,7 @@ func TestParsePrefixExpressions(t *testing.T) {
 			t.Fatal("Not of type ExpressionStatement")
 		}
 
-		prefixExpression, ok := expressionStatement.Value.(Ast.PrefixExpression)
+		prefixExpression, ok := expressionStatement.Value.(*Ast.PrefixExpression)
 		if !ok {
 			t.Fatal("Not of type prefixExpression")
 		}

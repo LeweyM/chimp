@@ -43,6 +43,22 @@ func TestInfixInteger(t *testing.T) {
 
 }
 
+func TestPrefixInteger(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected int64
+	}{
+		{"-10", -10},
+	}
+
+	for _, tt := range tests {
+		evaluatedProgramme := evaluateTest(tt.input)
+
+		testInteger(evaluatedProgramme, t, tt.expected)
+	}
+
+}
+
 func TestAssignment(t *testing.T) {
 	tests := []struct {
 		input    string

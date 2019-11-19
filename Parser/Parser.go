@@ -261,7 +261,7 @@ func (p *Parser) parsePrefixExpression() Ast.Expression {
 	token := p.getCurrentToken()
 	p.advanceTokens()
 
-	return Ast.PrefixExpression{
+	return &Ast.PrefixExpression{
 		Token: Token.Token{
 			Type:    token.Type,
 			Literal: token.Literal,

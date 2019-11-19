@@ -21,10 +21,33 @@ func Eval(node Ast.Node, env Object.Environment) Object.Object {
 		}
 	case *Ast.InfixExpression:
 		return evalInfix(node, env)
+	case *Ast.PrefixExpression:
+		return evalPrefix(node, env)
 	case *Ast.IntegerExpression:
 		return Object.Integer{Value: node.Value}
 	}
 
+	return nil
+}
+
+func evalPrefix(p *Ast.PrefixExpression, env Object.Environment) Object.Object {
+	exp := Eval(p.Expression, env)
+
+	switch {
+	case exp.Type() == Object.INTEGER_OBJ:
+		expInteger := exp.(Object.Integer)
+
+		return evalPrefixInteger(p.Operator, expInteger.Value)
+	}
+
+	return nil
+}
+
+func evalPrefixInteger(operator string, value int64) Object.Object {
+	switch operator {
+	case "-":
+		return Object.Integer{Value: -value}
+	}
 	return nil
 }
 
