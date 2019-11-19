@@ -86,9 +86,8 @@ type IdentityExpression struct {
 func (ie IdentityExpression) TokenLiteral() string { return ie.Token.Literal }
 func (ie IdentityExpression) expressionNode()      {}
 func (ie IdentityExpression) ToString() string {
-	return fmt.Sprintf("%s", ie.Value,)
+	return fmt.Sprintf("%s", ie.Value, )
 }
-
 
 type ExpressionStatement struct {
 	Token Token.Token
@@ -97,7 +96,7 @@ type ExpressionStatement struct {
 
 func (ls ExpressionStatement) TokenLiteral() string { return ls.Token.Literal }
 func (ls ExpressionStatement) statementNode()       {}
-func (ls ExpressionStatement) ToString() string       {
+func (ls ExpressionStatement) ToString() string {
 	return ls.Value.ToString()
 }
 
@@ -109,10 +108,9 @@ type LetStatement struct {
 
 func (ls LetStatement) TokenLiteral() string { return ls.Token.Literal }
 func (ls LetStatement) statementNode()       {}
-func (ls LetStatement) ToString() string       {
+func (ls LetStatement) ToString() string {
 	return fmt.Sprintf("%v = %v", ls.Name.Value, ls.Value.ToString())
 }
-
 
 type ReturnStatement struct {
 	Token Token.Token
@@ -121,7 +119,7 @@ type ReturnStatement struct {
 
 func (rs ReturnStatement) TokenLiteral() string { return rs.Token.Literal }
 func (rs ReturnStatement) statementNode()       {}
-func (rs ReturnStatement) ToString() string       {
+func (rs ReturnStatement) ToString() string {
 	return fmt.Sprintf("return %s", rs.Value.ToString())
 }
 
@@ -161,3 +159,22 @@ func (bs BlockStatement) ToString() string {
 	builder.WriteString(" }")
 	return builder.String()
 }
+
+type FunctionExpression struct {
+	Token      Token.Token
+	Parameters []IdentityExpression
+	Body       BlockStatement
+}
+
+func (f FunctionExpression) TokenLiteral() string {
+	panic("implement me")
+}
+
+func (f FunctionExpression) expressionNode() {
+	panic("implement me")
+}
+
+func (f FunctionExpression) ToString() string {
+	return fmt.Sprintf("(%v) %v", f.Parameters[0].ToString(), f.Body.ToString())
+}
+

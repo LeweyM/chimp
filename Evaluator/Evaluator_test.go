@@ -64,7 +64,7 @@ func TestAssignment(t *testing.T) {
 		input    string
 		expected int64
 	}{
-		//{"let foo = 5; foo", 5},
+		{"let foo = 5; foo", 5},
 		{"let foo = 5;foo + 1", 6},
 	}
 

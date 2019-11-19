@@ -91,7 +91,7 @@ func (p *Parser) parseStatement() Ast.Statement {
 	case Token.LPAREN:
 		return p.parseBlockStatement()
 	case Token.RETURN:
-		return p.parseReturnStatement()	
+		return p.parseReturnStatement()
 	case Token.IF:
 		return p.parseIfStatement()
 	default:
@@ -104,7 +104,7 @@ func (p *Parser) parseExpression(contextPrecedence int) Ast.Expression {
 
 	prefix, ok := p.prefixRegistry[p.getCurrentToken().Type]
 	if !ok {
-		leftExp = p.parseIntegerExpression()
+		leftExp = p.parseLiteral()
 	} else {
 		leftExp = prefix()
 	}
@@ -185,7 +185,6 @@ func (p *Parser) parseBlockStatement() Ast.BlockStatement {
 	p.advanceTokens()
 
 	var statements []Ast.Statement
-	token = p.getCurrentToken()
 	for p.getCurrentToken().Type != Token.RPAREN && p.getCurrentToken().Type != Token.EOF {
 		statements = append(statements, p.parseStatement())
 		p.advanceTokens()
@@ -231,6 +230,16 @@ func (p *Parser) parseIdentExpression() Ast.Expression {
 	}
 }
 
+func (p *Parser) parseLiteral() Ast.Expression {
+	switch p.getCurrentToken().Type {
+	case Token.INT:
+		return *p.parseIntegerExpression()
+	case Token.FUNCTION:
+		return *p.parseFunctionExpression()
+	}
+	panic("cannot parse literal")
+}
+
 func (p *Parser) parseIntegerExpression() *Ast.IntegerExpression {
 	i, err := strconv.Atoi(p.getCurrentToken().Literal)
 	if err != nil {
@@ -238,6 +247,28 @@ func (p *Parser) parseIntegerExpression() *Ast.IntegerExpression {
 		return nil
 	}
 	return &Ast.IntegerExpression{Token: p.getCurrentToken(), Value: int64(i)}
+}
+
+func (p *Parser) parseFunctionExpression() *Ast.FunctionExpression {
+	token := p.getCurrentToken()
+
+	p.advanceTokens()
+	p.advanceTokens()
+
+	//TODO multi parameters
+	parameters := p.parseIdentExpression().(*Ast.IdentityExpression)
+
+	p.advanceTokens()
+	p.advanceTokens()
+
+	body := p.parseBlockStatement()
+
+	functionExpression := Ast.FunctionExpression{
+		Token:      token,
+		Parameters: []Ast.IdentityExpression{*parameters},
+		Body:       body,
+	}
+	return &functionExpression
 }
 
 func (p *Parser) parseInfixExpression(left Ast.Expression) Ast.Expression {
