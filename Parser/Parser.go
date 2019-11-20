@@ -39,6 +39,7 @@ func New(l Lexer.Lexer) *Parser {
 	p.infixRegistry[Token.DIVIDE] = p.parseInfixExpression
 
 	p.prefixRegistry = make(map[Token.TokenType]prefixFunc)
+	p.prefixRegistry[Token.FUNCTION] = p.parseFunctionExpression
 	p.prefixRegistry[Token.IDENT] = p.parseIdentExpression
 	p.prefixRegistry[Token.BANG] = p.parsePrefixExpression
 	p.prefixRegistry[Token.MINUS] = p.parsePrefixExpression
@@ -233,9 +234,7 @@ func (p *Parser) parseIdentExpression() Ast.Expression {
 func (p *Parser) parseLiteral() Ast.Expression {
 	switch p.getCurrentToken().Type {
 	case Token.INT:
-		return *p.parseIntegerExpression()
-	case Token.FUNCTION:
-		return *p.parseFunctionExpression()
+		return p.parseIntegerExpression()
 	}
 	panic("cannot parse literal")
 }
@@ -249,7 +248,7 @@ func (p *Parser) parseIntegerExpression() *Ast.IntegerExpression {
 	return &Ast.IntegerExpression{Token: p.getCurrentToken(), Value: int64(i)}
 }
 
-func (p *Parser) parseFunctionExpression() *Ast.FunctionExpression {
+func (p *Parser) parseFunctionExpression() Ast.Expression {
 	token := p.getCurrentToken()
 
 	p.advanceTokens()

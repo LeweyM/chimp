@@ -25,6 +25,8 @@ func Eval(node Ast.Node, env Object.Environment) Object.Object {
 		return evalPrefix(node, env)
 	case *Ast.IntegerExpression:
 		return Object.Integer{Value: node.Value}
+	//case *Ast.FunctionExpression:
+	//	return Object.Function{}
 	}
 
 	return nil
@@ -36,7 +38,6 @@ func evalPrefix(p *Ast.PrefixExpression, env Object.Environment) Object.Object {
 	switch {
 	case exp.Type() == Object.INTEGER_OBJ:
 		expInteger := exp.(Object.Integer)
-
 		return evalPrefixInteger(p.Operator, expInteger.Value)
 	}
 

@@ -272,7 +272,7 @@ func TestParseFunctionExpressions(t *testing.T) {
 			t.Fatal("Not of type ExpressionStatement")
 		}
 
-		functionExpression, ok := expressionStatement.Value.(Ast.FunctionExpression)
+		functionExpression, ok := expressionStatement.Value.(*Ast.FunctionExpression)
 		if !ok {
 			t.Fatal("Not of type functionExpression")
 		}
