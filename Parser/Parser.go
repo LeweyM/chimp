@@ -27,6 +27,7 @@ func New(l Lexer.Lexer) *Parser {
 	p.advanceTokens()
 	p.advanceTokens()
 	p.infixRegistry = make(map[Token.TokenType]infixFunc)
+	p.infixRegistry[Token.LBRACE] = p.parseCallExpression
 	p.infixRegistry[Token.GT] = p.parseInfixExpression
 	p.infixRegistry[Token.GTE] = p.parseInfixExpression
 	p.infixRegistry[Token.LT] = p.parseInfixExpression
@@ -114,7 +115,7 @@ func (p *Parser) parseExpression(contextPrecedence int) Ast.Expression {
 
 	operatorPres := p.getCurrentPrecedence()
 
-	for operatorPres > contextPrecedence {
+	for operatorPres >= contextPrecedence {
 		infix := p.infixRegistry[p.getCurrentToken().Type]
 		if infix == nil {
 			return leftExp
@@ -268,6 +269,21 @@ func (p *Parser) parseFunctionExpression() Ast.Expression {
 		Body:       body,
 	}
 	return &functionExpression
+}
+
+func (p *Parser) parseCallExpression(left Ast.Expression) Ast.Expression {
+	p.advanceTokens()
+
+	//TODO multi parameters
+	parameters := p.parseExpression(LOWEST)
+	identityExpression := left.(*Ast.IdentityExpression)
+
+	callExpression := Ast.CallExpression{
+		Token:      identityExpression.Token,
+		Identifier: *identityExpression,
+		Parameters: []Ast.Expression{parameters},
+	}
+	return &callExpression
 }
 
 func (p *Parser) parseInfixExpression(left Ast.Expression) Ast.Expression {

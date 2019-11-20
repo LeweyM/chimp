@@ -283,6 +283,44 @@ func TestParseFunctionExpressions(t *testing.T) {
 	}
 }
 
+func TestParseFunctionCallExpressions(t *testing.T) {
+	input := `
+		foo(5);
+		foo(51);
+	`
+	output := []string{
+		"foo(5)",
+		"foo(51)",
+	}
+
+	l := Lexer.New(input)
+	p := New(*l)
+
+	programme := p.ParseProgramme()
+	checkForErrors(p, t)
+
+	if len(programme.Statements) != len(output) {
+		t.Fatalf("Expected %d statements, got %d", len(output), len(programme.Statements))
+	}
+
+	for i, statement := range programme.Statements {
+
+		expressionStatement, ok := statement.(Ast.ExpressionStatement)
+		if !ok {
+			t.Fatal("Not of type ExpressionStatement")
+		}
+
+		callExpression, ok := expressionStatement.Value.(*Ast.CallExpression)
+		if !ok {
+			t.Fatal("Not of type callExpression")
+		}
+
+		if callExpression.ToString() != output[i] {
+			t.Fatalf("Expected output to be %s, got %s", output[i], callExpression.ToString())
+		}
+	}
+}
+
 func checkForErrors(p *Parser, t *testing.T) {
 	if len(p.errors) > 0 {
 		t.Errorf("%d errors found.\n", len(p.errors))

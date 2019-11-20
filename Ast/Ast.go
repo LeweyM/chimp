@@ -169,12 +169,26 @@ type FunctionExpression struct {
 func (f FunctionExpression) TokenLiteral() string {
 	panic("implement me")
 }
-
 func (f FunctionExpression) expressionNode() {
 	panic("implement me")
 }
-
 func (f FunctionExpression) ToString() string {
 	return fmt.Sprintf("(%v) %v", f.Parameters[0].ToString(), f.Body.ToString())
+}
+
+type CallExpression struct {
+	Token      Token.Token
+	Identifier IdentityExpression
+	Parameters []Expression
+}
+
+func (c CallExpression) TokenLiteral() string {
+	panic("implement me")
+}
+func (c CallExpression) expressionNode() {
+	panic("implement me")
+}
+func (c CallExpression) ToString() string {
+	return fmt.Sprintf("%s(%v)", c.Identifier.ToString(), c.Parameters[0].ToString())
 }
 

@@ -24,7 +24,7 @@ func TestEvalInteger(t *testing.T) {
 
 }
 
-//func TestEvalFunction(t *testing.T) {
+//fun TestEvalFunction(t *testing.T) {
 //	tests := []struct {
 //		input    string
 //		expected int64
