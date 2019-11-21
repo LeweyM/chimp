@@ -276,11 +276,10 @@ func (p *Parser) parseCallExpression(left Ast.Expression) Ast.Expression {
 
 	//TODO multi parameters
 	parameters := p.parseExpression(LOWEST)
-	identityExpression := left.(*Ast.IdentityExpression)
 
 	callExpression := Ast.CallExpression{
-		Token:      identityExpression.Token,
-		Identifier: *identityExpression,
+		Token:      Token.Token{},
+		Target:     left,
 		Parameters: []Ast.Expression{parameters},
 	}
 	return &callExpression

@@ -178,7 +178,7 @@ func (f FunctionExpression) ToString() string {
 
 type CallExpression struct {
 	Token      Token.Token
-	Identifier IdentityExpression
+	Target     Expression
 	Parameters []Expression
 }
 
@@ -189,6 +189,5 @@ func (c CallExpression) expressionNode() {
 	panic("implement me")
 }
 func (c CallExpression) ToString() string {
-	return fmt.Sprintf("%s(%v)", c.Identifier.ToString(), c.Parameters[0].ToString())
+	return fmt.Sprintf("fun%s(%v)", c.Target.ToString(), c.Parameters[0].ToString())
 }
-

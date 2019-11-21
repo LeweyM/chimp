@@ -285,12 +285,10 @@ func TestParseFunctionExpressions(t *testing.T) {
 
 func TestParseFunctionCallExpressions(t *testing.T) {
 	input := `
-		foo(5);
-		foo(51);
+		(fun(x) { return x; })(5)
 	`
 	output := []string{
-		"foo(5)",
-		"foo(51)",
+		"fun(x) { return x }(5)",
 	}
 
 	l := Lexer.New(input)

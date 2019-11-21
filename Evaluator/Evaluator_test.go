@@ -24,21 +24,22 @@ func TestEvalInteger(t *testing.T) {
 
 }
 
-//fun TestEvalFunction(t *testing.T) {
-//	tests := []struct {
-//		input    string
-//		expected int64
-//	}{
-//		{"func(x) {return x}(5)", 5},
-//	}
-//
-//	for _, tt := range tests {
-//		evaluatedProgramme := evaluateTest(tt.input)
-//
-//		testInteger(evaluatedProgramme, t, tt.expected)
-//	}
-//
-//}
+func TestEvalFunction(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected int64
+	}{
+		{"(fun(x) { return x; })(5)", 5},
+		{"(fun(y) { return y * 2; })(5)", 10},
+	}
+
+	for _, tt := range tests {
+		evaluatedProgramme := evaluateTest(tt.input)
+
+		testInteger(evaluatedProgramme, t, tt.expected)
+	}
+
+}
 
 func TestInfixInteger(t *testing.T) {
 	tests := []struct {
