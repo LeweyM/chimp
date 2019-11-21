@@ -35,19 +35,23 @@ func Eval(node Ast.Node, env Object.Environment) Object.Object {
 			Body:       node.Body,
 		}
 	case *Ast.CallExpression:
-		targetObject := Eval(node.Target, env)
-		function, ok := targetObject.(Object.Function)
-		if !ok { panic("not a function!") }
-
-		for i, paramValue := range node.Parameters {
-			paramIdentifier := function.Parameters[i]
-			env.Set(paramIdentifier, Eval(paramValue, env))
-		}
-
-		return Eval(function.Body, env)
+		return evalCall(node, env)
 	}
 
 	return nil
+}
+
+func evalCall(node *Ast.CallExpression, env Object.Environment) Object.Object {
+	targetObject := Eval(node.Target, env)
+	function, ok := targetObject.(Object.Function)
+	if !ok {
+		panic("not a function!")
+	}
+	for i, paramValue := range node.Parameters {
+		paramIdentifier := function.Parameters[i]
+		env.Set(paramIdentifier, Eval(paramValue, env))
+	}
+	return Eval(function.Body, env)
 }
 
 func evalPrefix(p *Ast.PrefixExpression, env Object.Environment) Object.Object {

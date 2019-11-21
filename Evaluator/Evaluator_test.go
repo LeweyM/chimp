@@ -31,6 +31,8 @@ func TestEvalFunction(t *testing.T) {
 	}{
 		{"(fun(x) { return x; })(5)", 5},
 		{"(fun(y) { return y * 2; })(5)", 10},
+		//{"(fun(x, y) { return y * x; })(5, 3)", 15},
+		//TODO: multi env closures
 	}
 
 	for _, tt := range tests {
