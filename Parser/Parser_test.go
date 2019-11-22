@@ -117,8 +117,8 @@ func TestParseIfStatements(t *testing.T) {
 
 func TestParseLetStatements(t *testing.T) {
 	input := `
-		let foo = 67;
-		let five = 5;
+		monkeySay foo = 67;
+		monkeySay five = 5;
 	`
 	literals := []string{"foo", "five"}
 	values := []int64{67, 5}
@@ -247,7 +247,7 @@ func TestParsePrefixExpressions(t *testing.T) {
 
 func TestParseFunctionExpressions(t *testing.T) {
 	input := `
-		fun(x) {
+		monkeyDo(x) {
 			return x
 		};
 	`
@@ -285,7 +285,7 @@ func TestParseFunctionExpressions(t *testing.T) {
 
 func TestParseFunctionCallExpressions(t *testing.T) {
 	input := `
-		(fun(x) { return x; })(5)
+		(monkeyDo(x) { return x; })(5)
 	`
 	output := []string{
 		"fun(x) { return x }(5)",

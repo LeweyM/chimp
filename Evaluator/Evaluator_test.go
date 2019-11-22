@@ -29,8 +29,8 @@ func TestEvalFunction(t *testing.T) {
 		input    string
 		expected int64
 	}{
-		{"(fun(x) { return x; })(5)", 5},
-		{"(fun(y) { return y * 2; })(5)", 10},
+		{"(monkeyDo(x) { return x; })(5)", 5},
+		{"(monkeyDo(y) { return y * 2; })(5)", 10},
 		//{"(fun(x, y) { return y * x; })(5, 3)", 15},
 		//TODO: multi env closures
 	}
@@ -83,8 +83,8 @@ func TestAssignment(t *testing.T) {
 		input    string
 		expected int64
 	}{
-		{"let foo = 5; foo", 5},
-		{"let foo = 5;foo + 1", 6},
+		{"monkeySay foo = 5; foo", 5},
+		{"monkeySay foo = 5;foo + 1", 6},
 	}
 
 	for _, tt := range tests {

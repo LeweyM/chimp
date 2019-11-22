@@ -8,8 +8,8 @@ import (
 func TestNextToken(t *testing.T) {
 	var input = `
 		=;{}(),+!*/
-		let myVar =   99
-		let plus = fun(x, y) {
+		monkeySay myVar =   99
+		monkeySay plus = monkeyDo(x, y) {
 			return x + y
 		}
 		6 - 5; 10 > 2 < 3
@@ -31,14 +31,14 @@ func TestNextToken(t *testing.T) {
 		{Token.BANG, "!"},
 		{Token.MULTIPLY, "*"},
 		{Token.DIVIDE, "/"},
-		{Token.LET, "let"},
+		{Token.LET, "monkeySay"},
 		{Token.IDENT, "myVar"},
 		{Token.ASSIGN, "="},
 		{Token.INT, "99"},
-		{Token.LET, "let"},
+		{Token.LET, "monkeySay"},
 		{Token.IDENT, "plus"},
 		{Token.ASSIGN, "="},
-		{Token.FUNCTION, "fun"},
+		{Token.FUNCTION, "monkeyDo"},
 		{Token.LBRACE, "("},
 		{Token.IDENT, "x"},
 		{Token.COMMA, ","},

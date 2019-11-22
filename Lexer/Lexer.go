@@ -5,11 +5,11 @@ import (
 )
 
 var keywords = map[string]Token.TokenType{
-	"fun":    Token.FUNCTION,
-	"let":    Token.LET,
-	"if":     Token.IF,
-	"else":   Token.ELSE,
-	"return": Token.RETURN,
+	"monkeySay": Token.LET,
+	"monkeyDo":  Token.FUNCTION,
+	"if":        Token.IF,
+	"else":      Token.ELSE,
+	"return":    Token.RETURN,
 }
 
 type Lexer struct {
