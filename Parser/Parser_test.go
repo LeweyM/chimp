@@ -247,12 +247,12 @@ func TestParsePrefixExpressions(t *testing.T) {
 
 func TestParseFunctionExpressions(t *testing.T) {
 	input := `
-		monkeyDo(x) {
-			return x
+		monkeyDo(x, y) {
+			return 10
 		};
 	`
 	output := []string{
-		"(x) { return x }",
+		"(x, y) { return 10 }",
 	}
 
 	l := Lexer.New(input)

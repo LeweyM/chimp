@@ -173,7 +173,14 @@ func (f FunctionExpression) expressionNode() {
 	panic("implement me")
 }
 func (f FunctionExpression) ToString() string {
-	return fmt.Sprintf("(%v) %v", f.Parameters[0].ToString(), f.Body.ToString())
+	buffer := bytes.Buffer{}
+	for i, param := range f.Parameters {
+		buffer.WriteString(param.ToString())
+		if (i + 1) < len(f.Parameters) {
+			buffer.WriteString(", ")
+		}
+	}
+	return fmt.Sprintf("(%v) %v", buffer.String(), f.Body.ToString())
 }
 
 type CallExpression struct {

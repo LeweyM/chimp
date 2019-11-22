@@ -253,22 +253,43 @@ func (p *Parser) parseFunctionExpression() Ast.Expression {
 	token := p.getCurrentToken()
 
 	p.advanceTokens()
-	p.advanceTokens()
 
-	//TODO multi parameters
-	parameters := p.parseIdentExpression().(*Ast.IdentityExpression)
+	parameters := p.parseParameters()
 
-	p.advanceTokens()
 	p.advanceTokens()
 
 	body := p.parseBlockStatement()
 
 	functionExpression := Ast.FunctionExpression{
 		Token:      token,
-		Parameters: []Ast.IdentityExpression{*parameters},
+		Parameters: parameters,
 		Body:       body,
 	}
 	return &functionExpression
+}
+
+func (p *Parser) parseParameters() []Ast.IdentityExpression {
+	if p.getCurrentToken().Type != Token.LBRACE { panic("params should be in braces!") }
+
+	p.advanceTokens()
+
+	if p.getCurrentToken().Type == Token.RBRACE {
+		return []Ast.IdentityExpression{}
+	}
+
+	param := p.parseIdentExpression().(*Ast.IdentityExpression)
+
+	expressions := []Ast.IdentityExpression{*param}
+	for p.getPeekToken().Type == Token.COMMA {
+		p.advanceTokens()
+		p.advanceTokens()
+		expressions = append(expressions, *p.parseIdentExpression().(*Ast.IdentityExpression))
+	}
+
+	p.advanceTokens()
+
+	if p.getCurrentToken().Type != Token.RBRACE { panic(fmt.Sprintf("should end with rbrace! got: %v", p.getCurrentToken().Type)) }
+	return expressions
 }
 
 func (p *Parser) parseCallExpression(left Ast.Expression) Ast.Expression {
