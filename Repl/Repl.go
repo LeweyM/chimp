@@ -12,7 +12,7 @@ import (
 
 func Start(in io.Reader, out io.Writer) {
 	scanner := bufio.NewScanner(in)
-	env := Object.NewEnvironment()
+	env := Object.NewEnvironment(nil)
 
 	for {
 		fmt.Println("Go on...")
@@ -27,7 +27,7 @@ func Start(in io.Reader, out io.Writer) {
 
 		programme := parser.ParseProgramme()
 
-		e := Evaluator.Eval(programme, *env)
+		e := Evaluator.Eval(programme, env)
 
 		io.WriteString(out, "Evaluated code: ")
 		io.WriteString(out, e.Inspect())

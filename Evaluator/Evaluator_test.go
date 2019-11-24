@@ -54,7 +54,7 @@ func TestEvalFunction(t *testing.T) {
 		{"(monkeyDo() { return 5; })()", 5},
 		{"(monkeyDo(y) { return y * 2; })(5)", 10},
 		{"(monkeyDo(x, y) { return y * x; })(5, 3)", 15},
-		//{"monkeySay x = 5; (monkeyDo(x) { return x; })(10); x; ", 5},
+		{"monkeySay x = 5; (monkeyDo(x) { return x; })(10); x; ", 5},
 	}
 
 	for _, tt := range tests {
@@ -131,7 +131,7 @@ func evaluateTest(input string) Object.Object {
 	l := Lexer.New(input)
 	p := Parser.New(*l)
 	programme := p.ParseProgramme()
-	env := Object.NewEnvironment()
+	env := Object.NewEnvironment(nil)
 
-	return Eval(programme, *env)
+	return Eval(programme, env)
 }

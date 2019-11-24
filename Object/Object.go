@@ -17,12 +17,14 @@ type Object interface {
 }
 
 type Environment struct {
-	store map[string]Object
+	parent *Environment
+	store  map[string]Object
 }
 
-func NewEnvironment() *Environment {
+func NewEnvironment(parent *Environment) *Environment {
 	return &Environment{
-		store: map[string]Object{},
+		parent: parent,
+		store:  map[string]Object{},
 	}
 }
 
@@ -32,6 +34,11 @@ func (e Environment) Set(key string, obj Object) {
 
 func (e Environment) Get(key string) (Object, bool) {
 	object, ok := e.store[key]
+	if !ok {
+		environment := e.parent
+		object, ok = environment.Get(key)
+	}
+
 	return object, ok
 }
 
@@ -53,7 +60,7 @@ func (f Function) Inspect() string {
 	var params = bytes.Buffer{}
 	for i, p := range f.Parameters {
 		params.WriteString(p)
-		if i + 1 != len(f.Parameters) {
+		if i+1 != len(f.Parameters) {
 			params.WriteString(", ")
 		}
 	}

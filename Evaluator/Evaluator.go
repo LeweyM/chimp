@@ -5,7 +5,7 @@ import (
 	"Chimp/Object"
 )
 
-func Eval(node Ast.Node, env Object.Environment) Object.Object {
+func Eval(node Ast.Node, env *Object.Environment) Object.Object {
 	switch node := node.(type) {
 	case Ast.Programme:
 		return evalStatements(node.Statements, env)
@@ -49,20 +49,19 @@ func evalFunction(node *Ast.FunctionExpression) Object.Object {
 	}
 }
 
-func evalCall(node *Ast.CallExpression, env Object.Environment) Object.Object {
+func evalCall(node *Ast.CallExpression, env *Object.Environment) Object.Object {
 	targetObject := Eval(node.Target, env)
 	function, ok := targetObject.(Object.Function)
-	if !ok {
-		panic("not a function!")
-	}
+	if !ok { panic("not a function!") }
+
+	localScope := Object.NewEnvironment(env)
 	for i, paramValue := range node.Parameters {
-		paramIdentifier := function.Parameters[i]
-		env.Set(paramIdentifier, Eval(paramValue, env))
+		localScope.Set(function.Parameters[i], Eval(paramValue, localScope))
 	}
-	return Eval(function.Body, env)
+	return Eval(function.Body, localScope)
 }
 
-func evalPrefix(p *Ast.PrefixExpression, env Object.Environment) Object.Object {
+func evalPrefix(p *Ast.PrefixExpression, env *Object.Environment) Object.Object {
 	exp := Eval(p.Expression, env)
 
 	switch {
@@ -82,7 +81,7 @@ func evalPrefixInteger(operator string, value int64) Object.Object {
 	return nil
 }
 
-func evalInfix(infix *Ast.InfixExpression, env Object.Environment) Object.Object {
+func evalInfix(infix *Ast.InfixExpression, env *Object.Environment) Object.Object {
 	left := Eval(infix.LeftExpression, env)
 	right := Eval(infix.RightExpression, env)
 
@@ -111,7 +110,7 @@ func evalInfixInteger(operator string, leftInteger, rightInteger int64) Object.O
 	return nil
 }
 
-func evalStatements(statements []Ast.Statement, env Object.Environment) Object.Object {
+func evalStatements(statements []Ast.Statement, env *Object.Environment) Object.Object {
 	var eval Object.Object
 
 	for _, statement := range statements {
