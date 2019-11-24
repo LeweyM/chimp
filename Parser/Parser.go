@@ -152,7 +152,9 @@ func (p *Parser) parseLetStatement() *Ast.LetStatement {
 		Value: valueExpression,
 	}
 
-	p.ignoreUntilSemicolon()
+	if p.getPeekToken().Type == Token.SEMICOLON {
+		p.advanceTokens()
+	}
 
 	return statement
 }

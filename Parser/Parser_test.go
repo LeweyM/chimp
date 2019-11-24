@@ -117,7 +117,7 @@ func TestParseIfStatements(t *testing.T) {
 
 func TestParseLetStatements(t *testing.T) {
 	input := `
-		monkeySay foo = 67;
+		monkeySay foo = 67
 		monkeySay five = 5;
 	`
 	literals := []string{"foo", "five"}
