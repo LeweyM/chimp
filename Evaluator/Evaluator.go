@@ -30,15 +30,23 @@ func Eval(node Ast.Node, env Object.Environment) Object.Object {
 	case *Ast.IntegerExpression:
 		return Object.Integer{Value: node.Value}
 	case *Ast.FunctionExpression:
-		return Object.Function{
-			Parameters: []string{ node.Parameters[0].ToString() },
-			Body:       node.Body,
-		}
+		return evalFunction(node)
 	case *Ast.CallExpression:
 		return evalCall(node, env)
 	}
 
 	return nil
+}
+
+func evalFunction(node *Ast.FunctionExpression) Object.Object {
+	var params []string
+	for _, p := range node.Parameters {
+		params = append(params, p.ToString())
+	}
+	return Object.Function{
+		Parameters: params,
+		Body:       node.Body,
+	}
 }
 
 func evalCall(node *Ast.CallExpression, env Object.Environment) Object.Object {

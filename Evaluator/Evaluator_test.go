@@ -4,8 +4,30 @@ import (
 	"Chimp/Lexer"
 	"Chimp/Object"
 	"Chimp/Parser"
+	"fmt"
 	"testing"
 )
+
+func TestObjectInspect(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{"monkeyDo() { return 5; }", "() { return 5 }"},
+		{"monkeyDo(x) { return 5; }", "(x) { return 5 }"},
+		{"monkeyDo(x ,y) { return 5; }", "(x, y) { return 5 }"},
+	}
+
+	for _, tt := range tests {
+		if tt.input != tt.expected {
+			inspection := evaluateTest(tt.input).Inspect()
+
+			if inspection != tt.expected {
+				t.Fatalf(fmt.Sprintf("inspect didn't match, expected: %s, got: %s", tt.expected, inspection))
+			}
+		}
+	}
+}
 
 func TestEvalInteger(t *testing.T) {
 	tests := []struct {
@@ -29,10 +51,10 @@ func TestEvalFunction(t *testing.T) {
 		input    string
 		expected int64
 	}{
-		{"(monkeyDo(x) { return x; })(5)", 5},
+		{"(monkeyDo() { return 5; })()", 5},
 		{"(monkeyDo(y) { return y * 2; })(5)", 10},
-		//{"(monkeyDo(x, y) { return y * x; })(5, 3)", 15},
-		//TODO: multi env closures
+		{"(monkeyDo(x, y) { return y * x; })(5, 3)", 15},
+		//{"monkeySay x = 5; (monkeyDo(x) { return x; })(10); x; ", 5},
 	}
 
 	for _, tt := range tests {

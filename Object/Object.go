@@ -2,6 +2,7 @@ package Object
 
 import (
 	"Chimp/Ast"
+	"bytes"
 	"fmt"
 )
 
@@ -48,4 +49,14 @@ type Function struct {
 
 func (f Function) Type() ObjectType { return FUNCTION_OBJ }
 
-func (f Function) Inspect() string { return fmt.Sprintf("(%v) %s", f.Parameters[0], f.Body.ToString())}
+func (f Function) Inspect() string {
+	var params = bytes.Buffer{}
+	for i, p := range f.Parameters {
+		params.WriteString(p)
+		if i + 1 != len(f.Parameters) {
+			params.WriteString(", ")
+		}
+	}
+
+	return fmt.Sprintf("(%v) %s", params.String(), f.Body.ToString())
+}
