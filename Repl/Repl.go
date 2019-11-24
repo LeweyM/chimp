@@ -7,6 +7,7 @@ import (
 	"Chimp/Parser"
 	"bufio"
 	"fmt"
+	"github.com/fatih/color"
 	"io"
 )
 
@@ -15,7 +16,7 @@ func Start(in io.Reader, out io.Writer) {
 	env := Object.NewEnvironment(nil)
 
 	for {
-		fmt.Println("Go on...")
+		color.Blue("Go on...")
 		scanned := scanner.Scan()
 		if !scanned {
 			return
@@ -28,23 +29,28 @@ func Start(in io.Reader, out io.Writer) {
 		programme := parser.ParseProgramme()
 
 		if errors := parser.GetErrors(); len(errors) > 0 {
-			io.WriteString(out, "Parsing Error:\n")
+			color.Set(color.FgRed)
+			_, _ = io.WriteString(out, "Parsing Error:\n")
 			for i, err := range errors {
-				io.WriteString(out, fmt.Sprintf("%d: %s\n", i, err))
+				_, _ = io.WriteString(out, fmt.Sprintf("%d: %s\n", i, err))
 			}
+			color.Unset()
 		} else {
 			p, err := Evaluator.Eval(programme, env)
 
 			if err != nil {
-				io.WriteString(out, "Evaluator error:\n")
-				io.WriteString(out, err.Error())
-				io.WriteString(out, "\n")
+				color.Set(color.FgRed)
+				_, _ = io.WriteString(out, "Evaluator error:\n")
+				_, _ = io.WriteString(out, err.Error())
+				_, _ = io.WriteString(out, "\n")
+				color.Unset()
 			} else {
-				io.WriteString(out, "Evaluated code: ")
-				io.WriteString(out, p.Inspect())
-				io.WriteString(out, "\n")
+				color.Set(color.FgYellow)
+				_, _ = io.WriteString(out, "$: ")
+				_, _ = io.WriteString(out, p.Inspect())
+				_, _ = io.WriteString(out, "\n")
+				color.Unset()
 			}
-
 		}
 	}
 }
