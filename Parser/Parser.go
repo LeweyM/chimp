@@ -105,21 +105,19 @@ func (p *Parser) parseExpression(contextPrecedence int) Ast.Expression {
 	var leftExp Ast.Expression
 
 	prefix, ok := p.prefixRegistry[p.getCurrentToken().Type]
-	if !ok {
-		leftExp = p.parseLiteral()
-	} else {
+	if ok {
 		leftExp = prefix()
+	} else {
+		leftExp = p.parseLiteral()
 	}
 
-	p.advanceTokens()
-
-	operatorPres := p.getCurrentPrecedence()
-
+	operatorPres := p.getPeekPrecedence()
 	for operatorPres >= contextPrecedence {
-		infix := p.infixRegistry[p.getCurrentToken().Type]
+		infix := p.infixRegistry[p.getPeekToken().Type]
 		if infix == nil {
 			return leftExp
 		}
+		p.advanceTokens()
 		leftExp = infix(leftExp)
 	}
 
@@ -171,7 +169,6 @@ func (p *Parser) parseReturnStatement() *Ast.ReturnStatement {
 }
 
 func (p *Parser) parseExpressionStatement() Ast.ExpressionStatement {
-
 	statement := Ast.ExpressionStatement{
 		Token: Token.Token{},
 		Value: p.parseExpression(LOWEST),
@@ -192,8 +189,6 @@ func (p *Parser) parseBlockStatement() Ast.BlockStatement {
 		p.advanceTokens()
 	}
 
-	p.advanceTokens()
-
 	return Ast.BlockStatement{
 		Token:      token,
 		Statements: statements,
@@ -202,18 +197,28 @@ func (p *Parser) parseBlockStatement() Ast.BlockStatement {
 
 func (p *Parser) parseIfStatement() Ast.IfStatement {
 	token := p.getCurrentToken()
+
 	p.advanceTokens()
 
+	if p.getCurrentToken().Type != Token.LBRACE { panic("if statement cond needs brace")}
+
 	condition := p.parseExpression(LOWEST)
+
+	if p.getCurrentToken().Type != Token.RBRACE { panic("if statement cond needs brace")}
+
+	p.advanceTokens()
 
 	thenStatement := p.parseBlockStatement()
 
 	var elseStatement Ast.BlockStatement
 
-	if p.getCurrentToken().Type == Token.ELSE {
+	if p.getPeekToken().Type == Token.ELSE {
+		p.advanceTokens()
 		p.advanceTokens()
 		elseStatement = p.parseBlockStatement()
 	}
+
+	p.ignoreUntilSemicolon()
 
 	return Ast.IfStatement{
 		Token:     token,
@@ -255,53 +260,61 @@ func (p *Parser) parseFunctionExpression() Ast.Expression {
 	p.advanceTokens()
 
 	parameters := p.parseParameters()
-
 	p.advanceTokens()
 
 	body := p.parseBlockStatement()
 
 	functionExpression := Ast.FunctionExpression{
 		Token:      token,
-		Parameters: parameters,
+		Parameters: mapParamsToIdentityExpressions(parameters),
 		Body:       body,
 	}
 	return &functionExpression
 }
 
-func (p *Parser) parseParameters() []Ast.IdentityExpression {
-	if p.getCurrentToken().Type != Token.LBRACE { panic("params should be in braces!") }
+func mapParamsToIdentityExpressions(parameters []Ast.Expression) []Ast.IdentityExpression {
+	var identityParams []Ast.IdentityExpression
+	for _, p := range parameters {
+		identityParams = append(identityParams, *p.(*Ast.IdentityExpression))
+	}
+	return identityParams
+}
+
+func (p *Parser) parseParameters() []Ast.Expression {
+	if p.getCurrentToken().Type != Token.LBRACE {
+		panic("params should be in braces!")
+	}
 
 	p.advanceTokens()
 
 	if p.getCurrentToken().Type == Token.RBRACE {
-		return []Ast.IdentityExpression{}
+		return []Ast.Expression{}
 	}
 
-	param := p.parseIdentExpression().(*Ast.IdentityExpression)
+	param := p.parseExpression(LOWEST)
 
-	expressions := []Ast.IdentityExpression{*param}
+	expressions := []Ast.Expression{param}
 	for p.getPeekToken().Type == Token.COMMA {
 		p.advanceTokens()
 		p.advanceTokens()
-		expressions = append(expressions, *p.parseIdentExpression().(*Ast.IdentityExpression))
+		expressions = append(expressions, p.parseExpression(LOWEST))
 	}
 
 	p.advanceTokens()
 
-	if p.getCurrentToken().Type != Token.RBRACE { panic(fmt.Sprintf("should end with rbrace! got: %v", p.getCurrentToken().Type)) }
+	if p.getCurrentToken().Type != Token.RBRACE {
+		panic(fmt.Sprintf("should end with rbrace! got: %v", p.getCurrentToken().Type))
+	}
 	return expressions
 }
 
 func (p *Parser) parseCallExpression(left Ast.Expression) Ast.Expression {
-	p.advanceTokens()
-
-	//TODO multi parameters
-	parameters := p.parseExpression(LOWEST)
+	parameters := p.parseParameters()
 
 	callExpression := Ast.CallExpression{
 		Token:      Token.Token{},
 		Target:     left,
-		Parameters: []Ast.Expression{parameters},
+		Parameters: parameters,
 	}
 	return &callExpression
 }
@@ -343,9 +356,9 @@ func (p *Parser) parseBracePrefixExpression() Ast.Expression {
 
 	expression := p.parseExpression(LOWEST)
 
-	if p.getCurrentToken().Type != Token.RBRACE {
-		return nil
-	}
+	p.advanceTokens()
+
+	if p.getCurrentToken().Type != Token.RBRACE { panic("brace parsing went wrong!") }
 
 	return expression
 	//last token pos at right brace
