@@ -3,39 +3,46 @@ package Evaluator
 import (
 	"Chimp/Ast"
 	"Chimp/Object"
+	"errors"
 )
 
-func Eval(node Ast.Node, env *Object.Environment) Object.Object {
+func Eval(node Ast.Node, env *Object.Environment) (obj Object.Object, err error) {
+	if err != nil {
+		return nil, err
+	}
 	switch node := node.(type) {
 	case Ast.Programme:
 		return evalStatements(node.Statements, env)
 	case Ast.ExpressionStatement:
 		return Eval(node.Value, env)
 	case *Ast.LetStatement:
-		env.Set(node.Name.Value, Eval(node.Value, env))
+		object, _ := Eval(node.Value, env)
+		env.Set(node.Name.Value, object)
 		return Eval(node.Value, env)
 	case *Ast.IdentityExpression:
 		val, ok := env.Get(node.Value)
 		if ok {
-			return val
+			return val, nil
+		} else {
+			return nil, errors.New(wrongIdentifierErrorMsg(node.Value))
 		}
 	case *Ast.InfixExpression:
-		return evalInfix(node, env)
+		return evalInfix(node, env), nil
 	case Ast.BlockStatement:
 		return evalStatements(node.Statements, env)
 	case *Ast.ReturnStatement:
 		return Eval(node.Value, env)
 	case *Ast.PrefixExpression:
-		return evalPrefix(node, env)
+		return evalPrefix(node, env), nil
 	case *Ast.IntegerExpression:
-		return Object.Integer{Value: node.Value}
+		return Object.Integer{Value: node.Value}, nil
 	case *Ast.FunctionExpression:
-		return evalFunction(node)
+		return evalFunction(node), nil
 	case *Ast.CallExpression:
 		return evalCall(node, env)
 	}
 
-	return nil
+	return nil, nil
 }
 
 func evalFunction(node *Ast.FunctionExpression) Object.Object {
@@ -49,20 +56,23 @@ func evalFunction(node *Ast.FunctionExpression) Object.Object {
 	}
 }
 
-func evalCall(node *Ast.CallExpression, env *Object.Environment) Object.Object {
-	targetObject := Eval(node.Target, env)
+func evalCall(node *Ast.CallExpression, env *Object.Environment) (obj Object.Object, err error) {
+	targetObject, _ := Eval(node.Target, env)
 	function, ok := targetObject.(Object.Function)
-	if !ok { panic("not a function!") }
+	if !ok {
+		panic("not a function!")
+	}
 
 	localScope := Object.NewEnvironment(env)
 	for i, paramValue := range node.Parameters {
-		localScope.Set(function.Parameters[i], Eval(paramValue, localScope))
+		obj, _ := Eval(paramValue, localScope)
+		localScope.Set(function.Parameters[i], obj)
 	}
 	return Eval(function.Body, localScope)
 }
 
 func evalPrefix(p *Ast.PrefixExpression, env *Object.Environment) Object.Object {
-	exp := Eval(p.Expression, env)
+	exp, _ := Eval(p.Expression, env)
 
 	switch {
 	case exp.Type() == Object.INTEGER_OBJ:
@@ -82,8 +92,8 @@ func evalPrefixInteger(operator string, value int64) Object.Object {
 }
 
 func evalInfix(infix *Ast.InfixExpression, env *Object.Environment) Object.Object {
-	left := Eval(infix.LeftExpression, env)
-	right := Eval(infix.RightExpression, env)
+	left, _ := Eval(infix.LeftExpression, env)
+	right, _ := Eval(infix.RightExpression, env)
 
 	switch {
 	case left.Type() == Object.INTEGER_OBJ && right.Type() == Object.INTEGER_OBJ:
@@ -110,12 +120,15 @@ func evalInfixInteger(operator string, leftInteger, rightInteger int64) Object.O
 	return nil
 }
 
-func evalStatements(statements []Ast.Statement, env *Object.Environment) Object.Object {
-	var eval Object.Object
+func evalStatements(statements []Ast.Statement, env *Object.Environment) (Object.Object, error) {
+	var (
+		eval Object.Object
+		err error
+		)
 
 	for _, statement := range statements {
-		eval = Eval(statement, env)
+		eval, err = Eval(statement, env)
 	}
 
-	return eval
+	return eval, err
 }

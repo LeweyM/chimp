@@ -333,6 +333,21 @@ func TestParseFunctionCallExpressions(t *testing.T) {
 	}
 }
 
+func TestParserErrors(t *testing.T) {
+	input := `
+		monkeySay foo = !;
+	`
+	l := Lexer.New(input)
+	p := New(*l)
+
+	programme := p.ParseProgramme()
+
+	if len(programme.Statements) != len(p.errors) {
+		t.Fatalf("Expected %d errors, got %d", len(programme.Statements), len(p.errors))
+	}
+
+}
+
 func checkForErrors(p *Parser, t *testing.T) {
 	if len(p.errors) > 0 {
 		t.Errorf("%d errors found.\n", len(p.errors))

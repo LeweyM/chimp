@@ -35,10 +35,12 @@ func (e Environment) Set(key string, obj Object) {
 func (e Environment) Get(key string) (Object, bool) {
 	object, ok := e.store[key]
 	if !ok {
-		environment := e.parent
-		object, ok = environment.Get(key)
+		if e.parent != nil {
+			object, ok = e.parent.Get(key)
+		} else {
+			return nil, false
+		}
 	}
-
 	return object, ok
 }
 

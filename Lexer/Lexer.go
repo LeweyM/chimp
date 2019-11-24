@@ -113,6 +113,9 @@ func (l *Lexer) NextToken() Token.Token {
 }
 
 func (l *Lexer) peekToken() byte {
+	if l.readPos == len(l.input) {
+		return 0
+	}
 	return l.input[l.readPos]
 }
 

@@ -29,6 +29,32 @@ func TestObjectInspect(t *testing.T) {
 	}
 }
 
+func TestEvalErrors(t *testing.T) {
+	tests := []struct {
+		input    string
+		errorMsg string
+	}{
+		{"varThatDoesntExist", wrongIdentifierErrorMsg("varThatDoesntExist")},
+	}
+
+	for _, tt := range tests {
+		l := Lexer.New(tt.input)
+		p := Parser.New(*l)
+		programme := p.ParseProgramme()
+		env := Object.NewEnvironment(nil)
+
+		_, err := Eval(programme, env)
+
+		if err == nil {
+			t.Fatalf("No error found")
+		}
+
+		if err.Error() != tt.errorMsg {
+			t.Fatalf(fmt.Sprintf("Wrong error message. Expected '%s', Got '%s'", tt.errorMsg, err.Error()))
+		}
+	}
+}
+
 func TestEvalInteger(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -133,5 +159,6 @@ func evaluateTest(input string) Object.Object {
 	programme := p.ParseProgramme()
 	env := Object.NewEnvironment(nil)
 
-	return Eval(programme, env)
+	obj, _ := Eval(programme, env)
+	return obj
 }

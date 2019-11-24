@@ -71,6 +71,10 @@ const (
 	MULTI
 )
 
+func (p *Parser) GetErrors() []string {
+	return p.errors
+}
+
 func (p *Parser) ParseProgramme() Ast.Programme {
 	programme := Ast.Programme{}
 	programme.Statements = []Ast.Statement{}
@@ -242,7 +246,8 @@ func (p *Parser) parseLiteral() Ast.Expression {
 	case Token.INT:
 		return p.parseIntegerExpression()
 	}
-	panic("cannot parse literal")
+	p.errors = append(p.errors, fmt.Sprintf("cannot parse literal '%s'", p.getCurrentToken().Literal))
+	return nil
 }
 
 func (p *Parser) parseIntegerExpression() *Ast.IntegerExpression {
