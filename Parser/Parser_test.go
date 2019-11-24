@@ -247,12 +247,16 @@ func TestParsePrefixExpressions(t *testing.T) {
 
 func TestParseFunctionExpressions(t *testing.T) {
 	input := `
-		monkeyDo(x, y) {
-			return 10
+		monkeyDo(x) {
+			return x;
+		};
+		monkeyDo() {
+			return 10;
 		};
 	`
 	output := []string{
-		"(x, y) { return 10 }",
+		"(x) { return x }",
+		"() { return 10 }",
 	}
 
 	l := Lexer.New(input)
@@ -285,10 +289,10 @@ func TestParseFunctionExpressions(t *testing.T) {
 
 func TestParseFunctionCallExpressions(t *testing.T) {
 	input := `
-		(monkeyDo(x) { return x; })(5)
+		(monkeyDo(x, y) { return x + y; })(5, 15);
 	`
 	output := []string{
-		"fun(x) { return x }(5)",
+		"fun(x, y) { return (x + y) }(5, 15)",
 	}
 
 	l := Lexer.New(input)

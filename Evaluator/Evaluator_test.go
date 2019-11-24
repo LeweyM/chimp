@@ -31,7 +31,7 @@ func TestEvalFunction(t *testing.T) {
 	}{
 		{"(monkeyDo(x) { return x; })(5)", 5},
 		{"(monkeyDo(y) { return y * 2; })(5)", 10},
-		//{"(fun(x, y) { return y * x; })(5, 3)", 15},
+		//{"(monkeyDo(x, y) { return y * x; })(5, 3)", 15},
 		//TODO: multi env closures
 	}
 

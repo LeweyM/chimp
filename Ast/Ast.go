@@ -196,5 +196,12 @@ func (c CallExpression) expressionNode() {
 	panic("implement me")
 }
 func (c CallExpression) ToString() string {
-	return fmt.Sprintf("fun%s(%v)", c.Target.ToString(), c.Parameters[0].ToString())
+	buffer := bytes.Buffer{}
+	for i, param := range c.Parameters {
+		buffer.WriteString(param.ToString())
+		if (i + 1) < len(c.Parameters) {
+			buffer.WriteString(", ")
+		}
+	}
+	return fmt.Sprintf("fun%s(%v)", c.Target.ToString(), buffer.String())
 }
