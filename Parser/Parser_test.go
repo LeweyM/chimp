@@ -294,9 +294,13 @@ func TestParseFunctionExpressions(t *testing.T) {
 func TestParseFunctionCallExpressions(t *testing.T) {
 	input := `
 		(monkeyDo(x, y) { return x + y; })(5, 15);
+		(monkeyDo() { return 10; })();
+		(monkeyDo(cb) { cb(10); })(monkeyDo(x) { return x * x; });
 	`
 	output := []string{
 		"fun(x, y) { return (x + y) }(5, 15)",
+		"fun() { return 10 }()",
+		"fun(cb) { funcb(10) }((x) { return (x * x) })",
 	}
 
 	l := Lexer.New(input)
