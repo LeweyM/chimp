@@ -60,7 +60,7 @@ func evalCall(node *Ast.CallExpression, env *Object.Environment) (obj Object.Obj
 	targetObject, _ := Eval(node.Target, env)
 	function, ok := targetObject.(Object.Function)
 	if !ok {
-		panic("not a function!")
+		return nil, errors.New(unknownFunctionErrorMsg(node.Target.ToString()))
 	}
 
 	localScope := Object.NewEnvironment(env)
