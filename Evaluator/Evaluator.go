@@ -27,7 +27,7 @@ func Eval(node Ast.Node, env *Object.Environment) (obj Object.Object, err error)
 			return nil, errors.New(wrongIdentifierErrorMsg(node.Value))
 		}
 	case *Ast.InfixExpression:
-		return evalInfix(node, env), nil
+		return evalInfix(node, env)
 	case Ast.BlockStatement:
 		return evalStatements(node.Statements, env)
 	case *Ast.ReturnStatement:
@@ -93,7 +93,7 @@ func evalPrefixInteger(operator string, value int64) Object.Object {
 	return nil
 }
 
-func evalInfix(infix *Ast.InfixExpression, env *Object.Environment) Object.Object {
+func evalInfix(infix *Ast.InfixExpression, env *Object.Environment) (Object.Object, error) {
 	left, _ := Eval(infix.LeftExpression, env)
 	right, _ := Eval(infix.RightExpression, env)
 
@@ -102,10 +102,10 @@ func evalInfix(infix *Ast.InfixExpression, env *Object.Environment) Object.Objec
 		leftInteger := left.(Object.Integer)
 		rightInteger := right.(Object.Integer)
 
-		return evalInfixInteger(infix.Operator, leftInteger.Value, rightInteger.Value)
+		return evalInfixInteger(infix.Operator, leftInteger.Value, rightInteger.Value), nil
 	}
 
-	return nil
+	return nil, errors.New(invalidInfixOperation(left.Inspect(), right.Inspect(), infix.Operator))
 }
 
 func evalInfixInteger(operator string, leftInteger, rightInteger int64) Object.Object {

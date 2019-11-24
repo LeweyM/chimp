@@ -36,6 +36,7 @@ func TestEvalErrors(t *testing.T) {
 	}{
 		{"varThatDoesntExist", wrongIdentifierErrorMsg("varThatDoesntExist")},
 		{"badFunc(10)", unknownFunctionErrorMsg("badFunc")},
+		{"1 + true", invalidInfixOperation("1", "true", "+")},
 	}
 
 	for _, tt := range tests {
