@@ -4,6 +4,7 @@ import (
 	"Chimp/Token"
 	"bytes"
 	"fmt"
+	"strconv"
 	"strings"
 )
 
@@ -48,6 +49,17 @@ func (ie IntegerExpression) TokenLiteral() string { return ie.Token.Literal }
 func (ie IntegerExpression) expressionNode()      {}
 func (ie IntegerExpression) ToString() string {
 	return ie.Token.Literal
+}
+
+type BoolExpression struct {
+	Token Token.Token
+	Value bool
+}
+
+func (be BoolExpression) TokenLiteral() string { return be.Token.Literal }
+func (be BoolExpression) expressionNode()      {}
+func (be BoolExpression) ToString() string {
+	return strconv.FormatBool(be.Value)
 }
 
 type InfixExpression struct {

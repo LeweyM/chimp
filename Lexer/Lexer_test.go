@@ -7,6 +7,7 @@ import (
 
 func TestNextToken(t *testing.T) {
 	var input = `
+		true false
 		=;{}(),+!*/
 		monkeySay myVar =   99
 		monkeySay plus = monkeyDo(x, y) {
@@ -20,6 +21,8 @@ func TestNextToken(t *testing.T) {
 		tokenType    Token.TokenType
 		tokenLiteral string
 	}{
+		{Token.TRUE, "true"},
+		{Token.FALSE, "false"},
 		{Token.ASSIGN, "="},
 		{Token.SEMICOLON, ";"},
 		{Token.LPAREN, "{"},

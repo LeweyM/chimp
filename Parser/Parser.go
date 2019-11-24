@@ -251,6 +251,16 @@ func (p *Parser) parseLiteral() Ast.Expression {
 	switch p.getCurrentToken().Type {
 	case Token.INT:
 		return p.parseIntegerExpression()
+	case Token.TRUE:
+		return &Ast.BoolExpression{
+			Token: p.getCurrentToken(),
+			Value: true,
+		}
+	case Token.FALSE:
+		return &Ast.BoolExpression{
+			Token: p.getCurrentToken(),
+			Value: false,
+		}
 	}
 	p.errors = append(p.errors, fmt.Sprintf("cannot parse literal '%s'", p.getCurrentToken().Literal))
 	return nil

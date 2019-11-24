@@ -11,7 +11,9 @@ const (
 	EOF     = "EOF"
 	ILLEGAL = "ILLEGAL"
 
-	CALL     = "CALL"
+	TRUE  = "TRUE"
+	FALSE = "FALSE"
+
 	FUNCTION = "FUN"
 	RETURN   = "RETURN"
 	IF       = "IF"

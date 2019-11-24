@@ -4,6 +4,7 @@ import (
 	"Chimp/Ast"
 	"Chimp/Lexer"
 	"Chimp/Token"
+	"fmt"
 	"testing"
 )
 
@@ -157,6 +158,44 @@ func TestParseLetStatements(t *testing.T) {
 			t.Fatalf("Expected value of %d, got %d", values[i], letStatement.Value)
 		}
 
+	}
+
+}
+
+func TestParseBooleanExpressions(t *testing.T) {
+	tests := []struct{
+		input string
+		output bool
+	}{
+		{"true", true},
+		{"false", false},
+	}
+
+
+	for _, tt := range tests {
+		l := Lexer.New(tt.input)
+		p := New(*l)
+
+		programme := p.ParseProgramme()
+		checkForErrors(p, t)
+
+		if len(programme.Statements) > 1 {
+			t.Fatalf("more than one statement")
+		}
+
+		expressionStatement, ok := programme.Statements[0].(Ast.ExpressionStatement)
+		if !ok {
+			t.Fatalf("not expression statement")
+		}
+
+		boolExpression := expressionStatement.Value.(*Ast.BoolExpression)
+		if !ok {
+			t.Fatalf("not boolean statement")
+		}
+
+		if boolExpression.Value != tt.output {
+			t.Fatalf(fmt.Sprintf("wrong bool value, got: '%t', expected: '%t'", boolExpression.Value, tt.output))
+		}
 	}
 
 }

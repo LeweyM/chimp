@@ -36,6 +36,8 @@ func Eval(node Ast.Node, env *Object.Environment) (obj Object.Object, err error)
 		return evalPrefix(node, env), nil
 	case *Ast.IntegerExpression:
 		return Object.Integer{Value: node.Value}, nil
+	case *Ast.BoolExpression:
+		return Object.Boolean{Value: node.Value}, nil
 	case *Ast.FunctionExpression:
 		return evalFunction(node), nil
 	case *Ast.CallExpression:

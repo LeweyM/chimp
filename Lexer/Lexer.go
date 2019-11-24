@@ -10,6 +10,8 @@ var keywords = map[string]Token.TokenType{
 	"if":        Token.IF,
 	"else":      Token.ELSE,
 	"return":    Token.RETURN,
+	"true":      Token.TRUE,
+	"false":     Token.FALSE,
 }
 
 type Lexer struct {

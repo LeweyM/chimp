@@ -73,6 +73,29 @@ func TestEvalInteger(t *testing.T) {
 
 }
 
+func TestEvalBool(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected bool
+	}{
+		{"true", true},
+		{"false", false},
+	}
+
+	for _, tt := range tests {
+		evaluatedProgramme := evaluateTest(tt.input)
+
+		boolObject, ok := evaluatedProgramme.(Object.Boolean)
+		if !ok {
+			t.Errorf("Object is not boolean, is %s", boolObject.Type())
+		}
+		if boolObject.Value != tt.expected {
+			t.Errorf("object has wrong value, expected %t, got %t", tt.expected, boolObject.Value)
+		}
+	}
+
+}
+
 func TestEvalFunction(t *testing.T) {
 	tests := []struct {
 		input    string

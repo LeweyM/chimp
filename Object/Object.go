@@ -8,8 +8,11 @@ import (
 
 type ObjectType string
 
-const INTEGER_OBJ = "INTEGER"
-const FUNCTION_OBJ = "FUNCTION"
+const (
+	INTEGER_OBJ  = "INTEGER"
+	BOOL_OBJ     = "BOOL"
+	FUNCTION_OBJ = "FUNCTION"
+)
 
 type Object interface {
 	Type() ObjectType
@@ -50,6 +53,13 @@ type Integer struct {
 
 func (i Integer) Type() ObjectType { return INTEGER_OBJ }
 func (i Integer) Inspect() string  { return fmt.Sprintf("%d", i.Value) }
+
+type Boolean struct {
+	Value bool
+}
+
+func (b Boolean) Type() ObjectType { return BOOL_OBJ }
+func (b Boolean) Inspect() string  { return fmt.Sprintf("%t", b.Value) }
 
 type Function struct {
 	Parameters []string
