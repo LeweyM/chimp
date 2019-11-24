@@ -296,11 +296,13 @@ func TestParseFunctionCallExpressions(t *testing.T) {
 		(monkeyDo(x, y) { return x + y; })(5, 15);
 		(monkeyDo() { return 10; })();
 		(monkeyDo(cb) { cb(10); })(monkeyDo(x) { return x * x; });
+		foo(10);
 	`
 	output := []string{
 		"fun(x, y) { return (x + y) }(5, 15)",
 		"fun() { return 10 }()",
 		"fun(cb) { funcb(10) }((x) { return (x * x) })",
+		"funfoo(10)",
 	}
 
 	l := Lexer.New(input)
