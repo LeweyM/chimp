@@ -247,15 +247,10 @@ func TestParsePrefixExpressions(t *testing.T) {
 
 func TestParseFunctionExpressions(t *testing.T) {
 	input := `
-		monkeyDo(x) {
-			return x;
-		};
-		monkeyDo() {
-			return 10;
-		};
-		monkeyDo(x, y) {
-			return x + y;
-		};
+		
+		monkeyDo(x) { return x }
+		monkeyDo() { return 10;}
+		monkeyDo(x, y) { return x + y; };
 	`
 	output := []string{
 		"(x) { return x }",

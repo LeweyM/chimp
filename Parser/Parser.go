@@ -164,7 +164,9 @@ func (p *Parser) parseReturnStatement() *Ast.ReturnStatement {
 
 	valueExpression := p.parseExpression(LOWEST)
 
-	p.ignoreUntilSemicolon()
+	if p.getPeekToken().Type == Token.SEMICOLON {
+		p.advanceTokens()
+	}
 
 	return &Ast.ReturnStatement{
 		Token: returnToken,
@@ -178,7 +180,9 @@ func (p *Parser) parseExpressionStatement() Ast.ExpressionStatement {
 		Value: p.parseExpression(LOWEST),
 	}
 
-	p.ignoreUntilSemicolon()
+	if p.getPeekToken().Type == Token.SEMICOLON {
+		p.advanceTokens()
+	}
 
 	return statement
 }
@@ -265,6 +269,7 @@ func (p *Parser) parseFunctionExpression() Ast.Expression {
 	p.advanceTokens()
 
 	parameters := p.parseParameters()
+
 	p.advanceTokens()
 
 	body := p.parseBlockStatement()
