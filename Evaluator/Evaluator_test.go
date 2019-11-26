@@ -72,7 +72,7 @@ func TestEvalInteger(t *testing.T) {
 	for _, tt := range tests {
 		evaluatedProgramme := evaluateTest(tt.input)
 
-		testInteger(evaluatedProgramme, t, tt.expected)
+		testInteger(t, evaluatedProgramme, tt.expected)
 	}
 
 }
@@ -89,15 +89,24 @@ func TestEvalBool(t *testing.T) {
 	for _, tt := range tests {
 		evaluatedProgramme := evaluateTest(tt.input)
 
-		boolObject, ok := evaluatedProgramme.(Object.Boolean)
-		if !ok {
-			t.Errorf("Object is not boolean, is %s", boolObject.Type())
-		}
-		if boolObject.Value != tt.expected {
-			t.Errorf("object has wrong value, expected %t, got %t", tt.expected, boolObject.Value)
-		}
+		testBoolean(t, evaluatedProgramme, tt.expected)
+	}
+}
+
+func TestEvalIfStatement(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected int64
+	}{
+		{"if (1 < 3) { return 5 }", 5},
+		{"if (2 != 1 + 1) { return 3 } else { return 10 }", 10},
 	}
 
+	for _, tt := range tests {
+		evaluatedProgramme := evaluateTest(tt.input)
+
+		testInteger(t, evaluatedProgramme, tt.expected)
+	}
 }
 
 func TestEvalFunction(t *testing.T) {
@@ -117,7 +126,7 @@ func TestEvalFunction(t *testing.T) {
 	for _, tt := range tests {
 		evaluatedProgramme := evaluateTest(tt.input)
 
-		testInteger(evaluatedProgramme, t, tt.expected)
+		testInteger(t, evaluatedProgramme, tt.expected)
 	}
 
 }
@@ -138,6 +147,7 @@ func TestInfixBoolean(t *testing.T) {
 
 	for _, tt := range tests {
 		evaluatedProgramme := evaluateTest(tt.input)
+
 		testBoolean(t, evaluatedProgramme, tt.expected)
 	}
 }
@@ -156,7 +166,7 @@ func TestInfixInteger(t *testing.T) {
 	for _, tt := range tests {
 		evaluatedProgramme := evaluateTest(tt.input)
 
-		testInteger(evaluatedProgramme, t, tt.expected)
+		testInteger(t, evaluatedProgramme, tt.expected)
 	}
 
 }
@@ -172,7 +182,7 @@ func TestPrefixInteger(t *testing.T) {
 	for _, tt := range tests {
 		evaluatedProgramme := evaluateTest(tt.input)
 
-		testInteger(evaluatedProgramme, t, tt.expected)
+		testInteger(t, evaluatedProgramme, tt.expected)
 	}
 
 }
@@ -205,12 +215,12 @@ func TestAssignment(t *testing.T) {
 	for _, tt := range tests {
 		evaluatedProgramme := evaluateTest(tt.input)
 
-		testInteger(evaluatedProgramme, t, tt.expected)
+		testInteger(t, evaluatedProgramme,tt.expected)
 	}
 
 }
 
-func testInteger(evaluatedProgramme Object.Object, t *testing.T, expected int64) {
+func testInteger(t *testing.T, evaluatedProgramme Object.Object, expected int64) {
 	integerObject, ok := evaluatedProgramme.(Object.Integer)
 	if !ok {
 		t.Errorf("Object is not integer, is %s", integerObject.Type())

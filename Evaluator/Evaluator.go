@@ -32,6 +32,15 @@ func Eval(node Ast.Node, env *Object.Environment) (obj Object.Object, err error)
 		return evalStatements(node.Statements, env)
 	case *Ast.ReturnStatement:
 		return Eval(node.Value, env)
+	case Ast.IfStatement:
+		object, _ := Eval(node.Condition, env)
+		boolExpression := object.(Object.Boolean)
+
+		if boolExpression.Value {
+			return Eval(node.Then, env)
+		} else {
+			return Eval(node.Else, env)
+		}
 	case *Ast.PrefixExpression:
 		return evalPrefix(node, env), nil
 	case *Ast.IntegerExpression:
@@ -139,6 +148,8 @@ func evalInfixInteger(operator string, leftInteger, rightInteger int64) Object.O
 		return Object.Boolean{Value: leftInteger <= rightInteger}
 	case "==":
 		return Object.Boolean{Value: leftInteger == rightInteger}
+	case "!=":
+		return Object.Boolean{Value: leftInteger != rightInteger}
 	}
 	return nil
 }
