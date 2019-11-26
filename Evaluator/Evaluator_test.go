@@ -37,6 +37,9 @@ func TestEvalErrors(t *testing.T) {
 		{"varThatDoesntExist", wrongIdentifierErrorMsg("varThatDoesntExist")},
 		{"badFunc(10)", unknownFunctionErrorMsg("badFunc")},
 		{"1 + true", invalidInfixOperation("1", "true", "+")},
+		{"1 > true", invalidInfixOperation("1", "true", ">")},
+		{"true + false", invalidInfixOperation("true", "false", "+")},
+		{"true < false", invalidInfixOperation("true", "false", "<")},
 	}
 
 	for _, tt := range tests {
@@ -119,6 +122,26 @@ func TestEvalFunction(t *testing.T) {
 
 }
 
+func TestInfixBoolean(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected bool
+	}{
+		{"5 > 1", true},
+		{"1 >= 1", true},
+		{"5 < 1", false},
+		{"5 <= 1", false},
+		{"5 <= 5", true},
+		{"5 == 6", false},
+		{"5 == 5", true},
+	}
+
+	for _, tt := range tests {
+		evaluatedProgramme := evaluateTest(tt.input)
+		testBoolean(t, evaluatedProgramme, tt.expected)
+	}
+}
+
 func TestInfixInteger(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -154,6 +177,22 @@ func TestPrefixInteger(t *testing.T) {
 
 }
 
+func TestPrefixBoolean(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected bool
+	}{
+		{"!true", false},
+	}
+
+	for _, tt := range tests {
+		evaluatedProgramme := evaluateTest(tt.input)
+
+		testBoolean(t, evaluatedProgramme, tt.expected)
+	}
+
+}
+
 func TestAssignment(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -178,6 +217,16 @@ func testInteger(evaluatedProgramme Object.Object, t *testing.T, expected int64)
 	}
 	if integerObject.Value != expected {
 		t.Errorf("object has wrong value, expected %d, got %d", expected, integerObject.Value)
+	}
+}
+
+func testBoolean(t *testing.T, evaluatedProgramme Object.Object, expected bool) {
+	booleanObject, ok := evaluatedProgramme.(Object.Boolean)
+	if !ok {
+		t.Errorf("Object is not boolean, is %s", booleanObject.Type())
+	}
+	if booleanObject.Value != expected {
+		t.Errorf("object has wrong value, expected %t, got %t", expected, booleanObject.Value)
 	}
 }
 

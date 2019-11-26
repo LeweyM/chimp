@@ -245,13 +245,13 @@ func TestParseInfixExpressions(t *testing.T) {
 func TestParsePrefixExpressions(t *testing.T) {
 	input := `
 		-3;
-		!5;
+		!true;
 		--4;
 		++100;
 	`
 	output := []string{
 		"(-3)",
-		"(!5)",
+		"(!true)",
 		"(--4)",
 		"(++100)",
 	}

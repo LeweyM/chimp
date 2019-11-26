@@ -81,6 +81,9 @@ func evalPrefix(p *Ast.PrefixExpression, env *Object.Environment) Object.Object 
 	case exp.Type() == Object.INTEGER_OBJ:
 		expInteger := exp.(Object.Integer)
 		return evalPrefixInteger(p.Operator, expInteger.Value)
+	case exp.Type() == Object.BOOL_OBJ:
+		expBool := exp.(Object.Boolean)
+		return evalPrefixBool(p.Operator, expBool.Value)
 	}
 
 	return nil
@@ -94,6 +97,14 @@ func evalPrefixInteger(operator string, value int64) Object.Object {
 	return nil
 }
 
+func evalPrefixBool(operator string, value bool) Object.Object {
+	switch operator {
+	case "!":
+		return Object.Boolean{Value: !value}
+	}
+	return nil
+}
+
 func evalInfix(infix *Ast.InfixExpression, env *Object.Environment) (Object.Object, error) {
 	left, _ := Eval(infix.LeftExpression, env)
 	right, _ := Eval(infix.RightExpression, env)
@@ -102,7 +113,6 @@ func evalInfix(infix *Ast.InfixExpression, env *Object.Environment) (Object.Obje
 	case left.Type() == Object.INTEGER_OBJ && right.Type() == Object.INTEGER_OBJ:
 		leftInteger := left.(Object.Integer)
 		rightInteger := right.(Object.Integer)
-
 		return evalInfixInteger(infix.Operator, leftInteger.Value, rightInteger.Value), nil
 	}
 
@@ -119,6 +129,16 @@ func evalInfixInteger(operator string, leftInteger, rightInteger int64) Object.O
 		return Object.Integer{Value: leftInteger * rightInteger}
 	case "/":
 		return Object.Integer{Value: leftInteger / rightInteger}
+	case ">":
+		return Object.Boolean{Value: leftInteger > rightInteger}
+	case ">=":
+		return Object.Boolean{Value: leftInteger >= rightInteger}
+	case "<":
+		return Object.Boolean{Value: leftInteger < rightInteger}
+	case "<=":
+		return Object.Boolean{Value: leftInteger <= rightInteger}
+	case "==":
+		return Object.Boolean{Value: leftInteger == rightInteger}
 	}
 	return nil
 }

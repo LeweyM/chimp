@@ -368,7 +368,7 @@ func (p *Parser) parsePrefixExpression() Ast.Expression {
 			Literal: token.Literal,
 		},
 		Operator:   token.Literal,
-		Expression: p.parseIntegerExpression(),
+		Expression: p.parseLiteral(),
 	}
 	// last token handled pos by parseIntegerExpression
 }
