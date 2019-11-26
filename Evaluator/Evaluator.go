@@ -39,7 +39,7 @@ func Eval(node Ast.Node, env *Object.Environment) (obj Object.Object, err error)
 	case *Ast.BoolExpression:
 		return Object.Boolean{Value: node.Value}, nil
 	case *Ast.FunctionExpression:
-		return evalFunction(node), nil
+		return evalFunction(node, env), nil
 	case *Ast.CallExpression:
 		return evalCall(node, env)
 	}
@@ -47,7 +47,7 @@ func Eval(node Ast.Node, env *Object.Environment) (obj Object.Object, err error)
 	return nil, nil
 }
 
-func evalFunction(node *Ast.FunctionExpression) Object.Object {
+func evalFunction(node *Ast.FunctionExpression, env *Object.Environment) Object.Object {
 	var params []string
 	for _, p := range node.Parameters {
 		params = append(params, p.ToString())
@@ -55,6 +55,7 @@ func evalFunction(node *Ast.FunctionExpression) Object.Object {
 	return Object.Function{
 		Parameters: params,
 		Body:       node.Body,
+		Env:        env,
 	}
 }
 
@@ -65,10 +66,10 @@ func evalCall(node *Ast.CallExpression, env *Object.Environment) (obj Object.Obj
 		return nil, errors.New(unknownFunctionErrorMsg(node.Target.ToString()))
 	}
 
-	localScope := Object.NewEnvironment(env)
+	localScope := Object.NewEnvironment(function.Env)
 	for i, paramValue := range node.Parameters {
-		obj, _ := Eval(paramValue, localScope)
-		localScope.Set(function.Parameters[i], obj)
+		paramObjectValue, _ := Eval(paramValue, localScope)
+		localScope.Set(function.Parameters[i], paramObjectValue)
 	}
 	return Eval(function.Body, localScope)
 }
@@ -125,8 +126,8 @@ func evalInfixInteger(operator string, leftInteger, rightInteger int64) Object.O
 func evalStatements(statements []Ast.Statement, env *Object.Environment) (Object.Object, error) {
 	var (
 		eval Object.Object
-		err error
-		)
+		err  error
+	)
 
 	for _, statement := range statements {
 		eval, err = Eval(statement, env)

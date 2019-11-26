@@ -64,6 +64,7 @@ func (b Boolean) Inspect() string  { return fmt.Sprintf("%t", b.Value) }
 type Function struct {
 	Parameters []string
 	Body       Ast.BlockStatement
+	Env        *Environment
 }
 
 func (f Function) Type() ObjectType { return FUNCTION_OBJ }

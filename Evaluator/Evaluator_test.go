@@ -106,6 +106,9 @@ func TestEvalFunction(t *testing.T) {
 		{"(monkeyDo(y) { return y * 2; })(5)", 10},
 		{"(monkeyDo(x, y) { return y * x; })(5, 3)", 15},
 		{"monkeySay x = 5; (monkeyDo(x) { return x; })(10); x; ", 5},
+		{`monkeySay closure = monkeyDo(x) { 
+					return monkeyDo() { return x } 
+				} closure(5)();`, 5},
 	}
 
 	for _, tt := range tests {
