@@ -20,14 +20,14 @@ type Object interface {
 }
 
 type Environment struct {
-	parent *Environment
-	store  map[string]Object
+	outer *Environment
+	store map[string]Object
 }
 
-func NewEnvironment(parent *Environment) *Environment {
+func NewEnvironment(outer *Environment) *Environment {
 	return &Environment{
-		parent: parent,
-		store:  map[string]Object{},
+		outer: outer,
+		store: map[string]Object{},
 	}
 }
 
@@ -38,8 +38,8 @@ func (e Environment) Set(key string, obj Object) {
 func (e Environment) Get(key string) (Object, bool) {
 	object, ok := e.store[key]
 	if !ok {
-		if e.parent != nil {
-			object, ok = e.parent.Get(key)
+		if e.outer != nil {
+			object, ok = e.outer.Get(key)
 		} else {
 			return nil, false
 		}

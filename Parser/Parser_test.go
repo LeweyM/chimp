@@ -85,8 +85,8 @@ func TestParseReturnStatements(t *testing.T) {
 
 func TestParseIfStatements(t *testing.T) {
 	input := `
-		if (1 < 2) { return 2; } else { return 1; };
-		if (5 < 0) { return 8; };
+		if (1 < 2) { return 2 } else { return 1 }
+		if (5 < 0) { return 8 }
 	`
 	output := []string{
 		"if (1 < 2) { return 2 } else { return 1 }",
@@ -206,12 +206,14 @@ func TestParseInfixExpressions(t *testing.T) {
 		1 + 2 * 3;
 		(1 * 2) + 3;
 		foo + 5
+		l(1) + l(0)
 	`
 	output := []string{
 		"(1 < 2)",
 		"(1 + (2 * 3))",
 		"((1 * 2) + 3)",
 		"(foo + 5)",
+		"(funl(1) + funl(0))",
 	}
 
 	l := Lexer.New(input)
@@ -286,15 +288,10 @@ func TestParsePrefixExpressions(t *testing.T) {
 
 func TestParseFunctionExpressions(t *testing.T) {
 	input := `
-		
-		monkeyDo(x) { return x }
-		monkeyDo() { return 10;}
-		monkeyDo(x, y) { return x + y; };
+		monkeyDo(l) { if (l(0) == 0) { return 0 } else { return (sum(l(1))) + l(0) } }
 	`
 	output := []string{
-		"(x) { return x }",
-		"() { return 10 }",
-		"(x, y) { return (x + y) }",
+		"(l) { if (funl(0) == 0) { return 0 } else { return (funsum(funl(1)) + funl(0)) } }",
 	}
 
 	l := Lexer.New(input)

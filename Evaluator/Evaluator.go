@@ -75,12 +75,15 @@ func evalCall(node *Ast.CallExpression, env *Object.Environment) (obj Object.Obj
 		return nil, errors.New(unknownFunctionErrorMsg(node.Target.ToString()))
 	}
 
-	localScope := Object.NewEnvironment(function.Env)
+	extendedScope := Object.NewEnvironment(function.Env)
 	for i, paramValue := range node.Parameters {
-		paramObjectValue, _ := Eval(paramValue, localScope)
-		localScope.Set(function.Parameters[i], paramObjectValue)
+		paramObjectValue, err := Eval(paramValue, env)
+		if err != nil {
+			panic("this shouldn't happen")
+		}
+		extendedScope.Set(function.Parameters[i], paramObjectValue)
 	}
-	return Eval(function.Body, localScope)
+	return Eval(function.Body, extendedScope)
 }
 
 func evalPrefix(p *Ast.PrefixExpression, env *Object.Environment) Object.Object {

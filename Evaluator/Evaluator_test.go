@@ -77,6 +77,26 @@ func TestEvalInteger(t *testing.T) {
 
 }
 
+func TestRecursive(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected int64
+	}{
+	{` 	monkeySay pair = monkeyDo(x, y) { return monkeyDo(i) { if (i == 0) { return x } else { return y } } }
+				monkeySay list = pair(100, pair(100, pair(0, 0) ) );
+				monkeySay sum = monkeyDo(l) { if (l(0) == 0) { return 0 } else { return (sum(l(1))) + l(0) } };
+				sum(list)
+				`, 200},
+	}
+
+	for _, tt := range tests {
+		evaluatedProgramme := evaluateTest(tt.input)
+
+		testInteger(t, evaluatedProgramme, tt.expected)
+	}
+
+}
+
 func TestEvalBool(t *testing.T) {
 	tests := []struct {
 		input    string

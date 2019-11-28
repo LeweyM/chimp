@@ -49,6 +49,7 @@ func New(l Lexer.Lexer) *Parser {
 	p.prefixRegistry[Token.LBRACE] = p.parseBracePrefixExpression
 
 	p.precedence = make(map[string]int)
+	p.precedence["("] = CALL
 	p.precedence["/"] = MULTI
 	p.precedence["*"] = MULTI
 	p.precedence["+"] = SUM
@@ -69,6 +70,7 @@ const (
 	EQUALS
 	SUM
 	MULTI
+	CALL
 )
 
 func (p *Parser) GetErrors() []string {
@@ -228,7 +230,9 @@ func (p *Parser) parseIfStatement() Ast.IfStatement {
 		elseStatement = p.parseBlockStatement()
 	}
 
-	p.ignoreUntilSemicolon()
+	if p.getPeekToken().Type == Token.SEMICOLON {
+		p.advanceTokens()
+	}
 
 	return Ast.IfStatement{
 		Token:     token,
